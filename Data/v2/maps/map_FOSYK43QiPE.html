@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>제주 혼여행이 왜이리 재밌어.. 4일간의 여름제주 브이로그🫰🏻🧡(나만 알고픈 숙소•인생맛집•혼여행 추천동네•힐링카페•길갈팜랜드) | dear.jerry</title>
+  <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=cxmkmsecgi"></script>
+</head>
+<body>
+<div id="map" style="width:100%;height:100vh;"></div>
+
+<script>
+var map = new naver.maps.Map('map', {
+    center: new naver.maps.LatLng(33.5431082, 126.6696924),
+    zoom: 10
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.5431082, 126.6696924),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF0000;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">1</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "함덕해수욕장"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.524847, 126.8533656),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF0000;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">4</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "구좌농협 하나로마트"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.5204975, 126.8606824),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF0000;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">5</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "가는곶 세화"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.5220277, 126.8606859),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF0000;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">6</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "테네시테이블"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.5251232, 126.8635558),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF0000;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">7</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "별방촌"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.5602922, 126.7300483),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF0000;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">8</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "좀녀네집"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.5480335, 126.6925687),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF0000;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">9</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "아일로사"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.5248254, 126.863),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF0000;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">10</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "카페한라산"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.4274837, 126.672113),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF0000;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">11</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "길갈 팜 랜드"
+});
+
+
+
+new naver.maps.Polyline({
+    map: map,
+    path: [new naver.maps.LatLng(33.5431082, 126.6696924),new naver.maps.LatLng(33.524847, 126.8533656),new naver.maps.LatLng(33.5204975, 126.8606824),new naver.maps.LatLng(33.5220277, 126.8606859),new naver.maps.LatLng(33.5251232, 126.8635558),new naver.maps.LatLng(33.5602922, 126.7300483),new naver.maps.LatLng(33.5480335, 126.6925687),new naver.maps.LatLng(33.5248254, 126.863),new naver.maps.LatLng(33.4274837, 126.672113)],
+    strokeColor: "#FF0000",
+    strokeWeight: 4
+});
+
+</script>
+</body>
+</html>

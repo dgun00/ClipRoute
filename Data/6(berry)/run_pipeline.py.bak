@@ -1,0 +1,205 @@
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Dict, List, Any
+import re
+
+import config
+from utils.io import save_json
+from utils.logging_utils import log
+
+
+# Step2-1: day inference (heuristic)
+# - transcript 내 '2일차', 'Day 2', '둘째날' 같은 마커를 찾아 day를 재부여
+# - day=1로 몰린 케이스만 보정(기본 0.8 이상)
+
+_DAY_WORDS = {
+    "첫째": 1,
+    "둘째": 2,
+    "셋째": 3,
+    "넷째": 4,
+    "다섯째": 5,
+    "여섯째": 6,
+    "일곱째": 7,
+    "여덟째": 8,
+    "아홉째": 9,
+    "열째": 10,
+}
+
+_DAY_MARKER_RE = re.compile(
+    r"(?:(?P<num>[1-9]\d?)\s*일\s*차|day\s*(?P<day>[1-9]\d?)|(?P<word>첫째|둘째|셋째|넷째|다섯째|여섯째|일곱째|여덟째|아홉째|열째)\s*날)",
+    re.IGNORECASE,
+)
+
+
+def _extract_day_markers(transcript: str) -> List[Dict[str, Any]]:
+    """Return ordered list of day markers: [{"idx": int, "day": int, "match": str}]"""
+    t = transcript or ""
+    if not t:
+        return []
+
+    markers: List[Dict[str, Any]] = []
+    for m in _DAY_MARKER_RE.finditer(t):
+        day = 0
+        try:
+            if m.group("num"):
+                day = int(m.group("num"))
+            elif m.group("day"):
+                day = int(m.group("day"))
+            elif m.group("word"):
+                day = int(_DAY_WORDS.get(m.group("word"), 0))
+        except Exception:
+            day = 0
+
+        if day <= 0:
+            continue
+        markers.append({"idx": m.start(), "day": day, "match": m.group(0)})
+
+    # de-dup consecutive same-day markers
+    dedup: List[Dict[str, Any]] = []
+    last_day = None
+    for x in sorted(markers, key=lambda d: d["idx"]):
+        if last_day == x["day"]:
+            continue
+        dedup.append(x)
+        last_day = x["day"]
+
+    return dedup
+
+
+def _infer_day_from_markers(markers: List[Dict[str, Any]], mention_idx: int) -> int:
+    """Pick the latest marker before mention_idx."""
+    if not markers:
+        return 0
+
+    day = 0
+    for m in markers:
+        if mention_idx >= int(m.get("idx") or 0):
+            day = int(m.get("day") or 0)
+        else:
+            break
+    return day
+
+
+def _mention_index(transcript: str, place_name: str) -> int:
+    t = transcript or ""
+    n = (place_name or "").strip()
+    if not t or not n:
+        return 10**12
+
+    idx = t.lower().find(n.lower())
+    return idx if idx >= 0 else 10**12
+
+
+def run(materials: List[dict], places_raw: Dict[str, List[dict]]) -> Dict[str, List[dict]]:
+    """Step2-1: day 측정(휴리스틱)
+
+    Inputs:
+    - materials: step1 결과(List[dict])
+    - places_raw: step2 결과(Dict[video_id, List[place dict]])
+
+    Outputs:
+    - data/step2_1_day_inferred.json (전체 합본)
+    - data/step2_1_day_inferred/day_inferred_<video_id>.json (영상별 디버그)
+    - data/step2_1_day_inferred/_summary.json
+    """
+
+    data_dir = Path(getattr(config, "DATA_DIR", "data"))
+    out_dir = data_dir / "step2_1_day_inferred"
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # map materials by video_id
+    mat_map: Dict[str, dict] = {}
+    for m in (materials or []):
+        vid = m.get("video_id")
+        if vid:
+            mat_map[str(vid)] = m
+
+    results: Dict[str, List[dict]] = {}
+    summary: List[Dict[str, Any]] = []
+
+    min_day1_ratio = float(getattr(config, "DAY_INFER_MIN_DAY1_RATIO", 0.80))
+
+    for video_id, places in (places_raw or {}).items():
+        item = mat_map.get(video_id, {}) or {}
+        title = (item.get("title") or "").strip()
+        transcript = item.get("transcript") or ""
+
+        markers = _extract_day_markers(transcript)
+        reassigned = 0
+
+        if not places:
+            results[video_id] = []
+            payload = {
+                "meta": {
+                    "video_id": video_id,
+                    "title": title,
+                    "marker_count": len(markers),
+                    "reassigned": 0,
+                    "note": "no_places",
+                    "markers": markers[:20],
+                },
+                "places": [],
+            }
+            save_json(out_dir / f"day_inferred_{video_id}.json", payload)
+            summary.append({**payload["meta"], "count": 0})
+            continue
+
+        day_values = [int(p.get("day") or 1) for p in places]
+        day1_ratio = sum(1 for d in day_values if d == 1) / max(1, len(day_values))
+
+        updated = [dict(p) for p in places]
+
+        # 대부분이 day=1이면, 마커 기반으로 day 재부여
+        if markers and day1_ratio >= min_day1_ratio:
+            for p in updated:
+                try:
+                    cur_day = int(p.get("day") or 1)
+                except Exception:
+                    cur_day = 1
+
+                # 이미 day가 명시된 항목(예: chapters 기반)은 유지
+                if cur_day > 1:
+                    continue
+
+                name = (p.get("place_name") or "").strip()
+                mi = _mention_index(transcript, name)
+                inferred = _infer_day_from_markers(markers, mi)
+
+                if inferred > 0 and inferred != cur_day:
+                    p["day"] = inferred
+                    vr = (p.get("visit_reason") or "").strip()
+                    p["visit_reason"] = (vr + f"; day_inferred({inferred})").strip("; ")
+                    p.setdefault("day_evidence", {"markers": markers[:10]})
+                    reassigned += 1
+
+            if reassigned:
+                log(
+                    "step2.1",
+                    "day_infer",
+                    video_id=video_id,
+                    title=title,
+                    markers=len(markers),
+                    reassigned=reassigned,
+                )
+
+        results[video_id] = updated
+
+        payload = {
+            "meta": {
+                "video_id": video_id,
+                "title": title,
+                "day1_ratio": day1_ratio,
+                "marker_count": len(markers),
+                "reassigned": reassigned,
+                "markers": markers[:20],
+            },
+            "places": updated,
+        }
+        save_json(out_dir / f"day_inferred_{video_id}.json", payload)
+        summary.append({**payload["meta"], "count": len(updated)})
+
+    save_json(out_dir / "_summary.json", summary)
+    save_json(data_dir / "step2_1_day_inferred.json", results)
+    log("step2.1", "saved", path=str(out_dir), videos=len(results))
+    return results

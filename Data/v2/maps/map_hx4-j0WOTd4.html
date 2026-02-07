@@ -1,0 +1,189 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>나혼자 2박 3일 제주 vlog | 제주도 뚜벅이 동쪽 루트🍧 인스타 감성 카페부터 맛집, 소품샵까지 총정리!</title>
+  <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=cxmkmsecgi"></script>
+</head>
+<body>
+<div id="map" style="width:100%;height:100vh;"></div>
+
+<script>
+var map = new naver.maps.Map('map', {
+    center: new naver.maps.LatLng(33.4502057, 126.9184535),
+    zoom: 10
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.4502057, 126.9184535),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF0000;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">1</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "플레이스 캠프 제주"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.4595094, 126.930137),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF0000;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">2</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "프릳츠 제주성산점"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.4499644, 126.9145773),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF0000;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">3</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "단백"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.4605203, 126.3220034),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF0000;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">4</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "애월농협 하나로마트"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.4291638, 126.9322343),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF7F00;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">1</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "유민 아르누보 뮤지엄"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.5214316, 126.8576031),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF7F00;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">2</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "호자"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.4946104, 126.811639),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF7F00;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">5</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "차한모금"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.5322786, 126.618623),
+    map: map,
+    icon: {
+        content: '<div style="background:#FFFF00;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">1</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "신촌덕인당"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.5348878, 126.6219718),
+    map: map,
+    icon: {
+        content: '<div style="background:#FFFF00;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">2</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "엠블라"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.5127942, 126.5285229),
+    map: map,
+    icon: {
+        content: '<div style="background:#FFFF00;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">3</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "동문시장"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.4931213, 126.5368634),
+    map: map,
+    icon: {
+        content: '<div style="background:#FFFF00;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">4</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "미띠뽀티하우스"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.5034198, 126.5141597),
+    map: map,
+    icon: {
+        content: '<div style="background:#FFFF00;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">5</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "서사라모이세해장국"
+});
+
+
+
+new naver.maps.Polyline({
+    map: map,
+    path: [new naver.maps.LatLng(33.4502057, 126.9184535),new naver.maps.LatLng(33.4595094, 126.930137),new naver.maps.LatLng(33.4499644, 126.9145773),new naver.maps.LatLng(33.4605203, 126.3220034)],
+    strokeColor: "#FF0000",
+    strokeWeight: 4
+});
+
+
+new naver.maps.Polyline({
+    map: map,
+    path: [new naver.maps.LatLng(33.4291638, 126.9322343),new naver.maps.LatLng(33.5214316, 126.8576031),new naver.maps.LatLng(33.4946104, 126.811639)],
+    strokeColor: "#FF7F00",
+    strokeWeight: 4
+});
+
+
+new naver.maps.Polyline({
+    map: map,
+    path: [new naver.maps.LatLng(33.5322786, 126.618623),new naver.maps.LatLng(33.5348878, 126.6219718),new naver.maps.LatLng(33.5127942, 126.5285229),new naver.maps.LatLng(33.4931213, 126.5368634),new naver.maps.LatLng(33.5034198, 126.5141597)],
+    strokeColor: "#FFFF00",
+    strokeWeight: 4
+});
+
+</script>
+</body>
+</html>

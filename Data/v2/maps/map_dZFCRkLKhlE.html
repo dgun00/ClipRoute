@@ -1,0 +1,77 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>(SUB) '여름 제주, 여기 꼭 가봐요…‘🍊 | 맛집•카페 지도 링크 공유 | 잘 안 알려진 시크릿 비치 | 제주도 서쪽 여행</title>
+  <script src="https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=cxmkmsecgi"></script>
+</head>
+<body>
+<div id="map" style="width:100%;height:100vh;"></div>
+
+<script>
+var map = new naver.maps.Map('map', {
+    center: new naver.maps.LatLng(33.4985513, 126.4591844),
+    zoom: 10
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.4985513, 126.4591844),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF0000;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">1</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "자매국수"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.3943224, 126.23989),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF0000;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">2</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "협재해수욕장"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.217709, 126.2497839),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF0000;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">3</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "미영이네"
+});
+
+
+new naver.maps.Marker({
+    position: new naver.maps.LatLng(33.302276, 126.6190301),
+    map: map,
+    icon: {
+        content: '<div style="background:#FF7F00;color:white;border-radius:50%;width:28px;height:28px;line-height:28px;text-align:center;font-weight:bold;">2</div>',
+        size: new naver.maps.Size(28, 28),
+        anchor: new naver.maps.Point(14, 14)
+    },
+    title: "대한목장"
+});
+
+
+
+new naver.maps.Polyline({
+    map: map,
+    path: [new naver.maps.LatLng(33.4985513, 126.4591844),new naver.maps.LatLng(33.3943224, 126.23989),new naver.maps.LatLng(33.217709, 126.2497839)],
+    strokeColor: "#FF0000",
+    strokeWeight: 4
+});
+
+</script>
+</body>
+</html>

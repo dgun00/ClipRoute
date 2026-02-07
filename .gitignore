@@ -1,0 +1,26 @@
+# 보안 파일 및 설정 파일 제외
+.env
+credentials.json
+config.py
+# 모든 JSON 파일을 제외하면 프로젝트에 필요한 설정값(예: 위치 데이터)까지 제외될 수 있으므로 주의가 필요합니다.
+*.json
+
+# 파이썬 캐시 및 빌드 파일 제외
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 운영체제 생성 파일 제외
+.DS_Store
+Thumbs.db
+
+# 로그 및 데이터 파일 제외
+*.log
+*.csv
+*.xlsx
+
+# 가상환경 제외
+venv/
+.venv/
+env/
