@@ -1,0 +1,84 @@
+/* 기본 datepicker 스타일 import */
+@import 'react-datepicker/dist/react-datepicker.css';
+
+/* 커스텀 스타일 */
+.date-select-modal .react-datepicker {
+  font-family: inherit;
+  border: none;
+  width: 100%;
+}
+
+.date-select-modal .react-datepicker__month-container {
+  width: 100%;
+}
+
+.date-select-modal .react-datepicker__header {
+  background-color: white;
+  border-bottom: 1px solid #f3f4f6;
+  padding-top: 1rem;
+}
+
+.date-select-modal .react-datepicker__current-month {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000;
+}
+
+.date-select-modal .react-datepicker__day-name {
+  color: #6b7280;
+  font-size: 0.75rem;
+  width: 2.5rem;
+  line-height: 2rem;
+}
+
+.date-select-modal .react-datepicker__day {
+  width: 2.5rem;
+  line-height: 2.5rem;
+  margin: 0.125rem;
+  border-radius: 0.5rem;
+}
+
+.date-select-modal .react-datepicker__day--selected,
+.date-select-modal .react-datepicker__day--range-start,
+.date-select-modal .react-datepicker__day--range-end {
+  background-color: #42BCEB !important;
+  color: white;
+  font-weight: 600;
+}
+
+.date-select-modal .react-datepicker__day--in-range {
+  background-color: rgba(66, 188, 235, 0.2) !important;
+  color: #1f2937;
+}
+
+.date-select-modal .react-datepicker__day--in-selecting-range {
+  background-color: rgba(66, 188, 235, 0.1) !important;
+}
+
+.date-select-modal .react-datepicker__day:hover {
+  background-color: #f3f4f6;
+  border-radius: 0.5rem;
+}
+
+.date-select-modal .react-datepicker__day--keyboard-selected {
+  background-color: transparent;
+}
+
+/* 일요일 빨간색 */
+.date-select-modal .react-datepicker__day--sunday {
+  color: #ef4444;
+}
+
+/* 토요일 파란색 */
+.date-select-modal .react-datepicker__day--saturday {
+  color: #3b82f6;
+}
+
+/* 네비게이션 버튼 */
+.date-select-modal .react-datepicker__navigation {
+  top: 1rem;
+}
+
+.date-select-modal .react-datepicker__navigation-icon::before {
+  border-color: #6b7280;
+}
