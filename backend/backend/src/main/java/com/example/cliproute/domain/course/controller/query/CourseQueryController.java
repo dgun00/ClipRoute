@@ -1,10 +1,10 @@
 package com.example.cliproute.domain.course.controller.query;
 
-import com.example.cliproute_project.domain.course.dto.res.CourseResDTO;
-import com.example.cliproute_project.domain.course.exception.code.CourseSuccessCode;
-import com.example.cliproute_project.domain.course.service.query.CourseQueryService;
-import com.example.cliproute_project.global.apiPayload.ApiResponse;
-import com.example.cliproute_project.global.apiPayload.code.GeneralSuccessCode;
+import com.example.cliproute.domain.course.dto.res.CourseResDTO;
+import com.example.cliproute.domain.course.exception.code.CourseSuccessCode;
+import com.example.cliproute.domain.course.service.query.CourseQueryService;
+import com.example.cliproute.global.apiPayload.ApiResponse;
+import com.example.cliproute.global.apiPayload.code.GeneralSuccessCode;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;

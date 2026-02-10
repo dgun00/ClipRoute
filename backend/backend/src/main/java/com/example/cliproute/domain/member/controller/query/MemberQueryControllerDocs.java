@@ -1,8 +1,8 @@
 package com.example.cliproute.domain.member.controller.query;
 
-import com.example.cliproute_project.domain.member.dto.res.MemberResDTO;
-import com.example.cliproute_project.domain.member.enums.TravelStatus;
-import com.example.cliproute_project.global.apiPayload.ApiResponse;
+import com.example.cliproute.domain.member.dto.res.MemberResDTO;
+import com.example.cliproute.domain.member.enums.TravelStatus;
+import com.example.cliproute.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 

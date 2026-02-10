@@ -1,7 +1,7 @@
 package com.example.cliproute.global.apiPayload;
 
-import com.example.cliproute_project.global.apiPayload.code.BaseErrorCode;
-import com.example.cliproute_project.global.apiPayload.code.BaseSuccessCode;
+import com.example.cliproute.global.apiPayload.code.BaseErrorCode;
+import com.example.cliproute.global.apiPayload.code.BaseSuccessCode;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;

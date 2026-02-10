@@ -1,9 +1,9 @@
 package com.example.cliproute.domain.place.converter;
 
-import com.example.cliproute_project.domain.place.dto.res.PlaceResDTO;
-import com.example.cliproute_project.domain.place.entity.Place;
-import com.example.cliproute_project.global.common.converter.SliceConverter;
-import com.example.cliproute_project.global.common.dto.SliceInfoDTO;
+import com.example.cliproute.domain.place.dto.res.PlaceResDTO;
+import com.example.cliproute.domain.place.entity.Place;
+import com.example.cliproute.global.common.converter.SliceConverter;
+import com.example.cliproute.global.common.dto.SliceInfoDTO;
 import org.springframework.data.domain.Slice;
 
 import java.util.List;

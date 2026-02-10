@@ -1,6 +1,6 @@
 package com.example.cliproute.domain.place.service.query;
 
-import com.example.cliproute_project.domain.place.dto.res.PlaceResDTO;
+import com.example.cliproute.domain.place.dto.res.PlaceResDTO;
 
 public interface PlaceQueryService {
 

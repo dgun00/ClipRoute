@@ -1,6 +1,6 @@
 package com.example.cliproute.global.apiPayload.exception;
 
-import com.example.cliproute_project.global.apiPayload.code.BaseErrorCode;
+import com.example.cliproute.global.apiPayload.code.BaseErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

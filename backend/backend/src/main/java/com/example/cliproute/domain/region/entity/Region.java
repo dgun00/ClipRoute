@@ -1,6 +1,6 @@
 package com.example.cliproute.domain.region.entity;
 
-import com.example.cliproute_project.global.entity.BaseEntity;
+import com.example.cliproute.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 

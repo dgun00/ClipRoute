@@ -1,7 +1,7 @@
 package com.example.cliproute.domain.region.controller;
 
-import com.example.cliproute_project.domain.region.dto.res.RegionResDTO;
-import com.example.cliproute_project.global.apiPayload.ApiResponse;
+import com.example.cliproute.domain.region.dto.res.RegionResDTO;
+import com.example.cliproute.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 

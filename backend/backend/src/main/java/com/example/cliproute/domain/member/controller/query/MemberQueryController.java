@@ -1,11 +1,11 @@
 package com.example.cliproute.domain.member.controller.query;
 
-import com.example.cliproute_project.domain.member.dto.res.MemberResDTO;
-import com.example.cliproute_project.domain.member.enums.TravelStatus;
-import com.example.cliproute_project.domain.member.exception.code.MemberSuccessCode;
-import com.example.cliproute_project.domain.member.service.query.MemberQueryService;
-import com.example.cliproute_project.domain.course.exception.code.CourseSuccessCode;
-import com.example.cliproute_project.global.apiPayload.ApiResponse;
+import com.example.cliproute.domain.member.dto.res.MemberResDTO;
+import com.example.cliproute.domain.member.enums.TravelStatus;
+import com.example.cliproute.domain.member.exception.code.MemberSuccessCode;
+import com.example.cliproute.domain.member.service.query.MemberQueryService;
+import com.example.cliproute.domain.course.exception.code.CourseSuccessCode;
+import com.example.cliproute.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

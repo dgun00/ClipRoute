@@ -1,6 +1,6 @@
 package com.example.cliproute.domain.member.repository.membercourse;
 
-import com.example.cliproute_project.domain.member.entity.mapping.MemberCourse;
+import com.example.cliproute.domain.member.entity.mapping.MemberCourse;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

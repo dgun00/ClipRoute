@@ -1,6 +1,6 @@
 package com.example.cliproute.domain.region.service.query;
 
-import com.example.cliproute_project.domain.region.dto.res.RegionResDTO;
+import com.example.cliproute.domain.region.dto.res.RegionResDTO;
 
 public interface RegionQueryService {
 

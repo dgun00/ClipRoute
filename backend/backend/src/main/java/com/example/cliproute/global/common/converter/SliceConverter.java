@@ -1,6 +1,6 @@
 package com.example.cliproute.global.common.converter;
 
-import com.example.cliproute_project.global.common.dto.SliceInfoDTO;
+import com.example.cliproute.global.common.dto.SliceInfoDTO;
 import org.springframework.data.domain.Slice;
 
 public class SliceConverter {

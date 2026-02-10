@@ -1,6 +1,6 @@
 package com.example.cliproute.domain.place.repository;
 
-import com.example.cliproute_project.domain.place.entity.Place;
+import com.example.cliproute.domain.place.entity.Place;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;

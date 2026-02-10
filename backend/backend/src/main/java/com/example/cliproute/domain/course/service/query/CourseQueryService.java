@@ -1,6 +1,6 @@
 package com.example.cliproute.domain.course.service.query;
 
-import com.example.cliproute_project.domain.course.dto.res.CourseResDTO;
+import com.example.cliproute.domain.course.dto.res.CourseResDTO;
 
 public interface CourseQueryService  {
 

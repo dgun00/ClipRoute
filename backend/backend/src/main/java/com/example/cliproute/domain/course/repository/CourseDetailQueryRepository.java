@@ -1,10 +1,10 @@
 package com.example.cliproute.domain.course.repository;
 
-import com.example.cliproute_project.domain.course.entity.QCourse;
-import com.example.cliproute_project.domain.course.entity.mapping.QCoursePlace;
-import com.example.cliproute_project.domain.course.repository.projection.CoursePlaceDetailFlat;
-import com.example.cliproute_project.domain.place.entity.QPlace;
-import com.example.cliproute_project.domain.video.entity.mapping.QVideoPlace;
+import com.example.cliproute.domain.course.entity.QCourse;
+import com.example.cliproute.domain.course.entity.mapping.QCoursePlace;
+import com.example.cliproute.domain.course.repository.projection.CoursePlaceDetailFlat;
+import com.example.cliproute.domain.place.entity.QPlace;
+import com.example.cliproute.domain.video.entity.mapping.QVideoPlace;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;

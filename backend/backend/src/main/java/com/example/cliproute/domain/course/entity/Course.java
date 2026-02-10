@@ -1,9 +1,9 @@
 package com.example.cliproute.domain.course.entity;
 
-import com.example.cliproute_project.domain.region.entity.Region;
-import com.example.cliproute_project.domain.member.entity.Member;
-import com.example.cliproute_project.domain.video.entity.Video;
-import com.example.cliproute_project.global.entity.BaseEntity;
+import com.example.cliproute.domain.region.entity.Region;
+import com.example.cliproute.domain.member.entity.Member;
+import com.example.cliproute.domain.video.entity.Video;
+import com.example.cliproute.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

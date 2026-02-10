@@ -1,10 +1,10 @@
 package com.example.cliproute.domain.member.controller.command;
 
-import com.example.cliproute_project.domain.member.dto.req.MemberReqDTO;
-import com.example.cliproute_project.domain.member.dto.res.MemberResDTO;
-import com.example.cliproute_project.domain.member.exception.code.MemberSuccessCode;
-import com.example.cliproute_project.domain.member.service.command.MemberCommandService;
-import com.example.cliproute_project.global.apiPayload.ApiResponse;
+import com.example.cliproute.domain.member.dto.req.MemberReqDTO;
+import com.example.cliproute.domain.member.dto.res.MemberResDTO;
+import com.example.cliproute.domain.member.exception.code.MemberSuccessCode;
+import com.example.cliproute.domain.member.service.command.MemberCommandService;
+import com.example.cliproute.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;

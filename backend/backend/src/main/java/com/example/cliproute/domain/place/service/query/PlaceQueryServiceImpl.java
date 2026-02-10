@@ -1,12 +1,12 @@
 package com.example.cliproute.domain.place.service.query;
 
-import com.example.cliproute_project.domain.place.converter.PlaceConverter;
-import com.example.cliproute_project.domain.place.dto.res.PlaceResDTO;
-import com.example.cliproute_project.domain.place.entity.Place;
-import com.example.cliproute_project.domain.place.enums.PlaceCategory;
-import com.example.cliproute_project.domain.place.exception.PlaceException;
-import com.example.cliproute_project.domain.place.exception.code.PlaceErrorCode;
-import com.example.cliproute_project.domain.place.repository.PlaceRepository;
+import com.example.cliproute.domain.place.converter.PlaceConverter;
+import com.example.cliproute.domain.place.dto.res.PlaceResDTO;
+import com.example.cliproute.domain.place.entity.Place;
+import com.example.cliproute.domain.place.enums.PlaceCategory;
+import com.example.cliproute.domain.place.exception.PlaceException;
+import com.example.cliproute.domain.place.exception.code.PlaceErrorCode;
+import com.example.cliproute.domain.place.repository.PlaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

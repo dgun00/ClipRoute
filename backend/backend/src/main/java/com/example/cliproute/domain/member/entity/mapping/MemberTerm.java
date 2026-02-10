@@ -1,8 +1,8 @@
 package com.example.cliproute.domain.member.entity.mapping;
 
-import com.example.cliproute_project.domain.member.entity.Member;
-import com.example.cliproute_project.domain.term.entity.Term;
-import com.example.cliproute_project.global.entity.BaseEntity;
+import com.example.cliproute.domain.member.entity.Member;
+import com.example.cliproute.domain.term.entity.Term;
+import com.example.cliproute.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 

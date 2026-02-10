@@ -1,6 +1,6 @@
 package com.example.cliproute.domain.notiSetting.entity;
-import com.example.cliproute_project.domain.member.entity.Member;
-import com.example.cliproute_project.global.entity.BaseEntity;
+import com.example.cliproute.domain.member.entity.Member;
+import com.example.cliproute.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
