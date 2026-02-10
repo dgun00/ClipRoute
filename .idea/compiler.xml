@@ -11,15 +11,11 @@
         <module name="cliproute.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="cliproute" target="17" />
-    </bytecodeTargetLevel>
+    <bytecodeTargetLevel target="17" />
   </component>
   <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_STRING" value="-parameters" />
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="cliproute" options="-parameters" />
-      <module name="cliproute.main" options="-parameters" />
-      <module name="cliproute.test" options="-parameters" />
       <module name="com.example.cliproute" options="-parameters" />
     </option>
   </component>
