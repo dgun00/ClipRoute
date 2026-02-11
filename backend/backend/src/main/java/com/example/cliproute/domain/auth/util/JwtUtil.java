@@ -4,6 +4,8 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
+
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
@@ -18,7 +20,7 @@ public class JwtUtil {
 
     @PostConstruct
     public void init() {
-        byte[] bytes = Base64.getDecoder().decode(Base64.getEncoder().encodeToString(secretKey.getBytes()));
+        byte[] bytes = secretKey.getBytes(StandardCharsets.UTF_8);
         key = Keys.hmacShaKeyFor(bytes);
     }
 
@@ -54,5 +56,12 @@ public class JwtUtil {
     // 2. 토큰에서 사용자 정보(Email) 가져오기
     public String getUserInfoFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
+    }
+
+    public String getEmailFromHeader(String bearerToken) {
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            return getUserInfoFromToken(bearerToken.substring(7));
+        }
+        throw new IllegalArgumentException("유효하지 않은 토큰 형식입니다.");
     }
 }

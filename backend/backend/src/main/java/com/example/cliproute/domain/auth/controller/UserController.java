@@ -31,7 +31,11 @@ public class UserController {
 
         try {
             String token = userService.login(loginDto);
+            System.out.println("\n================ [JWT TOKEN 발급] ================");
+            System.out.println("Bearer " + token);
+            System.out.println("==================================================\n");
             return ResponseEntity.ok()
+
                     .header("Authorization", "Bearer " + token)
                     .body("로그인 성공!");
         } catch (IllegalArgumentException e) {
