@@ -19,7 +19,7 @@ public interface MemberQueryControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "AUTH401_1", description = "Unauthorized")
     })
     ApiResponse<MemberResDTO.FilterOptionsDTO> getMyCourseFilterOptions(
-            Long memberId,
+            String token,
             Long regionId,
             Integer travelDays,
             TravelStatus travelStatus
@@ -35,7 +35,7 @@ public interface MemberQueryControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "AUTH401_1", description = "Unauthorized")
     })
     ApiResponse<MemberResDTO.MyCourseListDTO> getMyCourses(
-            Long memberId,
+            String token,
             Long regionId,
             Integer travelDays,
             TravelStatus travelStatus,
@@ -54,7 +54,7 @@ public interface MemberQueryControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "AUTH403_1", description = "Forbidden")
     })
     ApiResponse<MemberResDTO.MyCourseDetailDTO> getMyCourseDetail(
-            Long memberId,
+            String token,
             Long courseId
     );
 }
