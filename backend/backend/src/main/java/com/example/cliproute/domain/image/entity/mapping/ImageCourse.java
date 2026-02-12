@@ -1,0 +1,47 @@
+package com.example.cliproute.domain.image.entity.mapping;
+
+import com.example.cliproute.domain.course.entity.Course;
+import com.example.cliproute.domain.image.entity.Image;
+import com.example.cliproute.domain.image.enums.ImageType;
+import com.example.cliproute.global.entity.BaseEntity;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+
+
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "IMAGE_COURSE")
+public class ImageCourse extends BaseEntity {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // 이미지 id
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "image_id", nullable = false)
+    private Image image;
+
+    // 코스 id
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "course_id", nullable = false)
+    private Course course;
+
+    // 이미지 타입 (REPRESENTATIVE, MENU, INTERIOR, EXTERIOR 등)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "image_type", nullable = false)
+    private ImageType imageType;
+    
+    // 순서 (null 이면 생성 순)
+    @Column(name = "sequence")
+    private Integer sequence;
+    
+    // 설명
+    @Column(name = "description")
+    private String description;
+
+}
