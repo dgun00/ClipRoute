@@ -3,6 +3,7 @@ package com.example.cliproute.domain.place.controller.query;
 import com.example.cliproute.domain.place.dto.res.PlaceResDTO;
 import com.example.cliproute.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter; // 추가됨
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 public interface PlaceQueryControllerDocs {
@@ -22,6 +23,7 @@ public interface PlaceQueryControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "PLACE400_6", description = "No search condition.")
     })
     ApiResponse<PlaceResDTO.PlaceSearchResDTO> searchPlaces(
+            @Parameter(hidden = true) Long memberId, // [수정] 컨트롤러와 형식을 맞추기 위해 추가
             Long regionId,
             String category,
             Double minLat,

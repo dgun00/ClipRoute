@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.cliproute.domain.member.exception.MemberException;
+import com.example.cliproute.domain.member.exception.code.MemberErrorCode;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class PlaceQueryServiceImpl implements PlaceQueryService {
 
     @Override
     public PlaceResDTO.PlaceSearchResDTO searchPlacesByViewport(
+            Long memberId,
             Long regionId,
             String category,
             Double minLat,
@@ -37,6 +40,9 @@ public class PlaceQueryServiceImpl implements PlaceQueryService {
             Integer page,
             Integer size
     ) {
+        if (memberId == null) {
+            throw new MemberException(MemberErrorCode.UNAUTHORIZED);
+        }
         Integer resolvedPage = page != null ? page : 0;
         Integer resolvedSize = size != null ? size : 20;
         if (resolvedPage < 0 || resolvedSize <= 0) {

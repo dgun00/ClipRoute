@@ -6,6 +6,7 @@ import com.example.cliproute.domain.place.service.query.PlaceQueryService;
 import com.example.cliproute.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,6 +23,7 @@ public class PlaceQueryController implements PlaceQueryControllerDocs {
     // [11 API] Available places search
     @GetMapping("/search")
     public ApiResponse<PlaceResDTO.PlaceSearchResDTO> searchPlaces(
+            @AuthenticationPrincipal Long memberId,
             @RequestParam(required = false) Long regionId,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) Double minLat,
@@ -32,7 +34,7 @@ public class PlaceQueryController implements PlaceQueryControllerDocs {
             @RequestParam(required = false, defaultValue = "10") Integer pageSize
     ) {
         PlaceResDTO.PlaceSearchResDTO response = placeQueryService.searchPlacesByViewport(
-                regionId, category, minLat, maxLat, minLng, maxLng, page, pageSize
+                memberId, regionId, category, minLat, maxLat, minLng, maxLng, page, pageSize
         );
 
         return ApiResponse.onSuccess(
