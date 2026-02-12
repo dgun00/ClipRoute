@@ -1,6 +1,6 @@
 package com.example.cliproute.domain.course.exception.code;
 
-import com.example.cliproute_project.global.apiPayload.code.BaseErrorCode;
+import com.example.cliproute.global.apiPayload.code.BaseErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

@@ -1,10 +1,13 @@
 package com.example.cliproute.domain.member.service.query;
 
-import com.example.cliproute_project.domain.member.dto.res.MemberResDTO;
-import com.example.cliproute_project.domain.member.enums.TravelStatus;
+import com.example.cliproute.domain.member.dto.res.MemberResDTO;
+import com.example.cliproute.domain.member.enums.TravelStatus;
 
 
 public interface MemberQueryService {
+
+    // 이메일로 멤버 ID 조회
+    Long findIdByEmail(String email);
 
     // [6 API] My course filter options
     MemberResDTO.FilterOptionsDTO getMyCourseFilterOptions(

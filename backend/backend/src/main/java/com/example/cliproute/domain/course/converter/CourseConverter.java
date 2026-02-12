@@ -1,12 +1,12 @@
 package com.example.cliproute.domain.course.converter;
 
-import com.example.cliproute_project.domain.course.dto.req.CourseReqDTO;
-import com.example.cliproute_project.domain.course.dto.res.CourseResDTO;
-import com.example.cliproute_project.domain.course.entity.Course;
+import com.example.cliproute.domain.course.dto.req.CourseReqDTO;
+import com.example.cliproute.domain.course.dto.res.CourseResDTO;
+import com.example.cliproute.domain.course.entity.Course;
 
-import com.example.cliproute_project.domain.course.repository.projection.CoursePlaceDetailFlat;
-import com.example.cliproute_project.domain.member.entity.mapping.MemberCourse;
-import com.example.cliproute_project.global.common.dto.SliceInfoDTO;
+import com.example.cliproute.domain.course.repository.projection.CoursePlaceDetailFlat;
+import com.example.cliproute.domain.member.entity.mapping.MemberCourse;
+import com.example.cliproute.global.common.dto.SliceInfoDTO;
 
 import java.util.*;
 import java.util.stream.Collectors;

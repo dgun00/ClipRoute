@@ -1,9 +1,9 @@
 package com.example.cliproute.domain.place.controller.query;
 
-import com.example.cliproute_project.domain.place.dto.res.PlaceResDTO;
-import com.example.cliproute_project.domain.place.exception.code.PlaceSuccessCode;
-import com.example.cliproute_project.domain.place.service.query.PlaceQueryService;
-import com.example.cliproute_project.global.apiPayload.ApiResponse;
+import com.example.cliproute.domain.place.dto.res.PlaceResDTO;
+import com.example.cliproute.domain.place.exception.code.PlaceSuccessCode;
+import com.example.cliproute.domain.place.service.query.PlaceQueryService;
+import com.example.cliproute.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

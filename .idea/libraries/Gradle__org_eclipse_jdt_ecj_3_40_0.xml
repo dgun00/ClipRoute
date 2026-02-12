@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: org.eclipse.jdt:ecj:3.40.0" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="org.eclipse.jdt" artifactId="ecj" version="3.40.0" baseVersion="3.40.0" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.eclipse.jdt/ecj/3.40.0/5c26f6a20278196f8038a284d885c3796cd7d422/ecj-3.40.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

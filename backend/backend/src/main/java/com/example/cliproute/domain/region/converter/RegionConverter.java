@@ -1,7 +1,7 @@
 package com.example.cliproute.domain.region.converter;
 
-import com.example.cliproute_project.domain.region.dto.res.RegionResDTO;
-import com.example.cliproute_project.domain.region.entity.Region;
+import com.example.cliproute.domain.region.dto.res.RegionResDTO;
+import com.example.cliproute.domain.region.entity.Region;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -1,7 +1,7 @@
 package com.example.cliproute.domain.course.dto.res;
 
-import com.example.cliproute_project.domain.member.enums.TravelStatus;
-import com.example.cliproute_project.global.common.dto.SliceInfoDTO;
+import com.example.cliproute.domain.member.enums.TravelStatus;
+import com.example.cliproute.global.common.dto.SliceInfoDTO;
 import lombok.Builder;
 
 import java.time.LocalDate;

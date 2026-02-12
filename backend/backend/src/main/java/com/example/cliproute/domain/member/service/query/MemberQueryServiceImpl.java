@@ -1,17 +1,18 @@
 package com.example.cliproute.domain.member.service.query;
 
-import com.example.cliproute_project.domain.member.converter.MemberConverter;
-import com.example.cliproute_project.domain.member.dto.res.MemberResDTO;
-import com.example.cliproute_project.domain.member.enums.TravelStatus;
-import com.example.cliproute_project.domain.member.exception.MemberException;
-import com.example.cliproute_project.domain.member.exception.code.MemberCourseErrorCode;
-import com.example.cliproute_project.domain.member.exception.code.MemberErrorCode;
-import com.example.cliproute_project.domain.member.repository.membercourse.MemberCourseRepository;
-import com.example.cliproute_project.domain.member.repository.projection.MyCourseDetailFlat;
-import com.example.cliproute_project.domain.member.repository.projection.MyCourseListFlat;
-import com.example.cliproute_project.domain.member.repository.projection.MyCourseRegionOptionFlat;
-import com.example.cliproute_project.global.common.converter.SliceConverter;
-import com.example.cliproute_project.global.common.dto.SliceInfoDTO;
+import com.example.cliproute.domain.auth.repository.UserRepository;
+import com.example.cliproute.domain.member.converter.MemberConverter;
+import com.example.cliproute.domain.member.dto.res.MemberResDTO;
+import com.example.cliproute.domain.member.enums.TravelStatus;
+import com.example.cliproute.domain.member.exception.MemberException;
+import com.example.cliproute.domain.member.exception.code.MemberCourseErrorCode;
+import com.example.cliproute.domain.member.exception.code.MemberErrorCode;
+import com.example.cliproute.domain.member.repository.membercourse.MemberCourseRepository;
+import com.example.cliproute.domain.member.repository.projection.MyCourseDetailFlat;
+import com.example.cliproute.domain.member.repository.projection.MyCourseListFlat;
+import com.example.cliproute.domain.member.repository.projection.MyCourseRegionOptionFlat;
+import com.example.cliproute.global.common.converter.SliceConverter;
+import com.example.cliproute.global.common.dto.SliceInfoDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
@@ -27,7 +28,16 @@ import java.util.List;
 public class MemberQueryServiceImpl implements MemberQueryService {
 
     private final MemberCourseRepository memberCourseRepository;
+    private final UserRepository userRepository;
 
+    @Override
+    public Long findIdByEmail(String email) {
+        // 1. userRepository를 통해 이메일로 사용자를 찾습니다.
+        // 2. 없으면 예외를 던지고, 있으면 그 사용자의 고유 ID(Long)를 반환합니다.
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND))
+                .getId();
+    }
     @Override
     // [6 API] My course filter options
     public MemberResDTO.FilterOptionsDTO getMyCourseFilterOptions(
@@ -125,4 +135,3 @@ public class MemberQueryServiceImpl implements MemberQueryService {
         return MemberConverter.toMyCourseDetailDTO(flats);
     }
 }
-

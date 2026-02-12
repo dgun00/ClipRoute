@@ -1,9 +1,9 @@
 package com.example.cliproute.domain.course.repository;
 
-import com.example.cliproute_project.domain.course.entity.Course;
-import com.example.cliproute_project.domain.course.entity.QCourse;
-import com.example.cliproute_project.domain.region.entity.QRegion;
-import com.example.cliproute_project.domain.video.entity.QVideo;
+import com.example.cliproute.domain.course.entity.Course;
+import com.example.cliproute.domain.course.entity.QCourse;
+import com.example.cliproute.domain.region.entity.QRegion;
+import com.example.cliproute.domain.video.entity.QVideo;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -18,9 +18,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static com.example.cliproute_project.domain.course.entity.QCourse.course;
-import static com.example.cliproute_project.domain.video.entity.QVideo.video;
-import static com.example.cliproute_project.domain.region.entity.QRegion.region;
+import static com.example.cliproute.domain.course.entity.QCourse.course;
+import static com.example.cliproute.domain.video.entity.QVideo.video;
+import static com.example.cliproute.domain.region.entity.QRegion.region;
 
 
 @RequiredArgsConstructor

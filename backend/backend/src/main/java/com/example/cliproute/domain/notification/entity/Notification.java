@@ -1,8 +1,8 @@
 package com.example.cliproute.domain.notification.entity;
 
-import com.example.cliproute_project.domain.notification.enums.NotiType;
-import com.example.cliproute_project.domain.notification.enums.TargetGroup;
-import com.example.cliproute_project.global.entity.BaseEntity;
+import com.example.cliproute.domain.notification.enums.NotiType;
+import com.example.cliproute.domain.notification.enums.TargetGroup;
+import com.example.cliproute.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

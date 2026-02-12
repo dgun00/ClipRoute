@@ -1,8 +1,8 @@
 package com.example.cliproute.domain.place.entity;
 
-import com.example.cliproute_project.domain.place.enums.PlaceCategory;
-import com.example.cliproute_project.domain.region.entity.Region;
-import com.example.cliproute_project.global.entity.BaseEntity;
+import com.example.cliproute.domain.place.enums.PlaceCategory;
+import com.example.cliproute.domain.region.entity.Region;
+import com.example.cliproute.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

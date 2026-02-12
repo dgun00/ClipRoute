@@ -1,7 +1,7 @@
 package com.example.cliproute.domain.place.repository;
 
-import com.example.cliproute_project.domain.place.entity.Place;
-import com.example.cliproute_project.domain.place.enums.PlaceCategory;
+import com.example.cliproute.domain.place.entity.Place;
+import com.example.cliproute.domain.place.enums.PlaceCategory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 

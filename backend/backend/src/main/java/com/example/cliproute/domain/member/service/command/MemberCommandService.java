@@ -1,7 +1,7 @@
 package com.example.cliproute.domain.member.service.command;
 
-import com.example.cliproute_project.domain.member.dto.res.MemberResDTO;
-import com.example.cliproute_project.domain.member.dto.req.MemberReqDTO;
+import com.example.cliproute.domain.member.dto.res.MemberResDTO;
+import com.example.cliproute.domain.member.dto.req.MemberReqDTO;
 
 public interface MemberCommandService {
     // [8 API]

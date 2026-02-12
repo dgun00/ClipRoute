@@ -1,18 +1,18 @@
 package com.example.cliproute.domain.course.service.query;
 
-import com.example.cliproute_project.domain.course.converter.CourseConverter;
-import com.example.cliproute_project.domain.course.dto.res.CourseResDTO;
-import com.example.cliproute_project.domain.course.entity.Course;
-import com.example.cliproute_project.domain.course.exception.CourseException;
-import com.example.cliproute_project.domain.course.exception.code.CourseErrorCode;
-import com.example.cliproute_project.domain.course.repository.CourseDetailQueryRepository;
-import com.example.cliproute_project.domain.course.repository.CourseRepository;
-import com.example.cliproute_project.domain.course.repository.projection.CoursePlaceDetailFlat;
-import com.example.cliproute_project.domain.member.entity.mapping.MemberCourse;
-import com.example.cliproute_project.domain.member.enums.TravelStatus;
-import com.example.cliproute_project.domain.member.repository.membercourse.MemberCourseRepository;
-import com.example.cliproute_project.global.apiPayload.exception.GeneralException;
-import com.example.cliproute_project.global.common.dto.SliceInfoDTO;
+import com.example.cliproute.domain.course.converter.CourseConverter;
+import com.example.cliproute.domain.course.dto.res.CourseResDTO;
+import com.example.cliproute.domain.course.entity.Course;
+import com.example.cliproute.domain.course.exception.CourseException;
+import com.example.cliproute.domain.course.exception.code.CourseErrorCode;
+import com.example.cliproute.domain.course.repository.CourseDetailQueryRepository;
+import com.example.cliproute.domain.course.repository.CourseRepository;
+import com.example.cliproute.domain.course.repository.projection.CoursePlaceDetailFlat;
+import com.example.cliproute.domain.member.entity.mapping.MemberCourse;
+import com.example.cliproute.domain.member.enums.TravelStatus;
+import com.example.cliproute.domain.member.repository.membercourse.MemberCourseRepository;
+import com.example.cliproute.global.apiPayload.exception.GeneralException;
+import com.example.cliproute.global.common.dto.SliceInfoDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static com.example.cliproute_project.global.common.converter.SliceConverter.toSliceInfoDTO;
+import static com.example.cliproute.global.common.converter.SliceConverter.toSliceInfoDTO;
 
 @Service
 @RequiredArgsConstructor

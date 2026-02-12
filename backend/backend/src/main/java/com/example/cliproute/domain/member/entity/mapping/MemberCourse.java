@@ -1,10 +1,10 @@
 package com.example.cliproute.domain.member.entity.mapping;
 
-import com.example.cliproute_project.domain.course.entity.Course;
-import com.example.cliproute_project.domain.member.entity.Member;
-import com.example.cliproute_project.domain.member.enums.TravelStatus;
-import com.example.cliproute_project.global.entity.BaseEntity;
-import com.example.cliproute_project.domain.course.dto.req.CourseReqDTO;
+import com.example.cliproute.domain.course.entity.Course;
+import com.example.cliproute.domain.member.entity.Member;
+import com.example.cliproute.domain.member.enums.TravelStatus;
+import com.example.cliproute.global.entity.BaseEntity;
+import com.example.cliproute.domain.course.dto.req.CourseReqDTO;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

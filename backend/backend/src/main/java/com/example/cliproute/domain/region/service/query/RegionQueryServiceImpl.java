@@ -1,9 +1,9 @@
 package com.example.cliproute.domain.region.service.query;
 
-import com.example.cliproute_project.domain.region.converter.RegionConverter;
-import com.example.cliproute_project.domain.region.dto.res.RegionResDTO;
-import com.example.cliproute_project.domain.region.entity.Region;
-import com.example.cliproute_project.domain.region.repository.RegionRepository;
+import com.example.cliproute.domain.region.converter.RegionConverter;
+import com.example.cliproute.domain.region.dto.res.RegionResDTO;
+import com.example.cliproute.domain.region.entity.Region;
+import com.example.cliproute.domain.region.repository.RegionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

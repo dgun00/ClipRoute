@@ -1,6 +1,6 @@
 package com.example.cliproute.global.common.converter;
 
-import com.example.cliproute_project.global.common.dto.PageInfoDTO;
+import com.example.cliproute.global.common.dto.PageInfoDTO;
 import org.springframework.data.domain.Page;
 
 public class PageConverter {

@@ -1,10 +1,10 @@
 package com.example.cliproute.domain.member.repository.membercourse;
 
-import com.example.cliproute_project.domain.member.entity.mapping.MemberCourse;
-import com.example.cliproute_project.domain.member.enums.TravelStatus;
-import com.example.cliproute_project.domain.member.repository.projection.MyCourseDetailFlat;
-import com.example.cliproute_project.domain.member.repository.projection.MyCourseListFlat;
-import com.example.cliproute_project.domain.member.repository.projection.MyCourseRegionOptionFlat;
+import com.example.cliproute.domain.member.entity.mapping.MemberCourse;
+import com.example.cliproute.domain.member.enums.TravelStatus;
+import com.example.cliproute.domain.member.repository.projection.MyCourseDetailFlat;
+import com.example.cliproute.domain.member.repository.projection.MyCourseListFlat;
+import com.example.cliproute.domain.member.repository.projection.MyCourseRegionOptionFlat;
 
 import java.util.List;
 import java.util.Optional;

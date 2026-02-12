@@ -1,9 +1,9 @@
 package com.example.cliproute.domain.image.entity.mapping;
 
-import com.example.cliproute_project.domain.image.entity.Image;
-import com.example.cliproute_project.domain.image.enums.ImageType;
-import com.example.cliproute_project.domain.place.entity.Place;
-import com.example.cliproute_project.global.entity.BaseEntity;
+import com.example.cliproute.domain.image.entity.Image;
+import com.example.cliproute.domain.image.enums.ImageType;
+import com.example.cliproute.domain.place.entity.Place;
+import com.example.cliproute.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 

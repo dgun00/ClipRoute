@@ -1,25 +1,25 @@
 package com.example.cliproute.domain.course.service.command;
 
-import com.example.cliproute_project.domain.course.dto.req.CourseReqDTO;
-import com.example.cliproute_project.domain.course.entity.Course;
-import com.example.cliproute_project.domain.course.exception.CourseException;
-import com.example.cliproute_project.domain.course.exception.code.CourseErrorCode;
-import com.example.cliproute_project.domain.course.repository.CourseRepository;
-import com.example.cliproute_project.domain.member.entity.Member;
-import com.example.cliproute_project.domain.member.entity.mapping.MemberCourse;
-import com.example.cliproute_project.domain.member.enums.TravelStatus;
-import com.example.cliproute_project.domain.member.repository.membercourse.MemberCourseRepository;
-import com.example.cliproute_project.domain.member.repository.member.MemberRepository;
-import com.example.cliproute_project.domain.course.dto.res.CourseResDTO;
-import com.example.cliproute_project.global.apiPayload.code.GeneralErrorCode;
-import com.example.cliproute_project.global.apiPayload.exception.GeneralException;
+import com.example.cliproute.domain.course.dto.req.CourseReqDTO;
+import com.example.cliproute.domain.course.entity.Course;
+import com.example.cliproute.domain.course.exception.CourseException;
+import com.example.cliproute.domain.course.exception.code.CourseErrorCode;
+import com.example.cliproute.domain.course.repository.CourseRepository;
+import com.example.cliproute.domain.member.entity.Member;
+import com.example.cliproute.domain.member.entity.mapping.MemberCourse;
+import com.example.cliproute.domain.member.enums.TravelStatus;
+import com.example.cliproute.domain.member.repository.membercourse.MemberCourseRepository;
+import com.example.cliproute.domain.member.repository.member.MemberRepository;
+import com.example.cliproute.domain.course.dto.res.CourseResDTO;
+import com.example.cliproute.global.apiPayload.code.GeneralErrorCode;
+import com.example.cliproute.global.apiPayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
 
-import static com.example.cliproute_project.domain.course.converter.CourseConverter.toScrapResult;
+import static com.example.cliproute.domain.course.converter.CourseConverter.toScrapResult;
 
 @Service
 @RequiredArgsConstructor

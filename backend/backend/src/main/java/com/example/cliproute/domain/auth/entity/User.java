@@ -56,4 +56,22 @@ public class User {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    public void updateProfile(String nickname, String email, Gender gender, AgeRange ageRange) {
+        if (nickname != null) this.nickname = nickname;
+        if (email != null) this.email = email;
+        if (gender != null) this.gender = gender;
+        if (ageRange != null) this.ageRange = ageRange;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+    public void updateStatus(MemberStatus status) {
+        this.status = status;
+        // 만약 상태가 DELETED로 변경되면 탈퇴 시간을 현재로 기록
+        if (status == MemberStatus.DELETED) {
+            this.deletedAt = LocalDateTime.now();
+        }
+    }
 }

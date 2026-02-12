@@ -1,7 +1,7 @@
 package com.example.cliproute.domain.place.dto.res;
 
-import com.example.cliproute_project.domain.place.enums.PlaceCategory;
-import com.example.cliproute_project.global.common.dto.SliceInfoDTO;
+import com.example.cliproute.domain.place.enums.PlaceCategory;
+import com.example.cliproute.global.common.dto.SliceInfoDTO;
 import lombok.Builder;
 
 import java.util.List;

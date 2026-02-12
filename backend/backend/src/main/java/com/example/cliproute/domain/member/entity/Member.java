@@ -1,7 +1,7 @@
 package com.example.cliproute.domain.member.entity;
 
-import com.example.cliproute_project.domain.member.enums.*;
-import com.example.cliproute_project.global.entity.BaseEntity;
+import com.example.cliproute.domain.member.enums.*;
+import com.example.cliproute.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

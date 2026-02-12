@@ -1,9 +1,9 @@
 package com.example.cliproute.domain.video.entity.mapping;
 
 
-import com.example.cliproute_project.domain.place.entity.Place;
-import com.example.cliproute_project.domain.video.entity.Video;
-import com.example.cliproute_project.global.entity.BaseEntity;
+import com.example.cliproute.domain.place.entity.Place;
+import com.example.cliproute.domain.video.entity.Video;
+import com.example.cliproute.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 

@@ -1,6 +1,6 @@
 package com.example.cliproute.domain.member.repository.projection;
 
-import com.example.cliproute_project.domain.member.enums.TravelStatus;
+import com.example.cliproute.domain.member.enums.TravelStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

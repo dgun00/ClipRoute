@@ -4,7 +4,6 @@ import com.example.cliproute.domain.auth.dto.req.LoginRequestDto;
 import com.example.cliproute.domain.auth.enums.MemberStatus;
 import com.example.cliproute.domain.auth.enums.Role;
 import com.example.cliproute.domain.auth.entity.User;
-import com.example.cliproute.entity.*;
 import com.example.cliproute.domain.auth.dto.req.SignUpRequestDto;
 import com.example.cliproute.domain.auth.repository.UserRepository;
 import com.example.cliproute.domain.auth.util.JwtUtil;
@@ -12,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -45,16 +45,16 @@ public class UserService {
     }
     @Transactional(readOnly = true)
     public String login(LoginRequestDto loginDto) {
-        // 1. 이메일 확인
+        // 이메일 확인
         User user = userRepository.findByEmail(loginDto.getEmail().toLowerCase())
                 .orElseThrow(() -> new IllegalArgumentException("가입되지 않은 이메일입니다."));
 
-        // 2. 비밀번호 확인 (암호화된 비번과 입력받은 비번 비교)
+        // 비밀번호 확인
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        // 3. 로그인 성공! (일단은 성공 메시지만 리턴, 나중에 여기서 JWT 토큰을 만듬)
+        // JWT 토큰 생성
         return jwtUtil.createToken(user.getEmail());
     }
 }

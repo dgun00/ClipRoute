@@ -1,9 +1,9 @@
 package com.example.cliproute.global.apiPayload.handler;
 
-import com.example.cliproute_project.global.apiPayload.ApiResponse;
-import com.example.cliproute_project.global.apiPayload.code.BaseErrorCode;
-import com.example.cliproute_project.global.apiPayload.code.GeneralErrorCode;
-import com.example.cliproute_project.global.apiPayload.exception.GeneralException;
+import com.example.cliproute.global.apiPayload.ApiResponse;
+import com.example.cliproute.global.apiPayload.code.BaseErrorCode;
+import com.example.cliproute.global.apiPayload.code.GeneralErrorCode;
+import com.example.cliproute.global.apiPayload.exception.GeneralException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

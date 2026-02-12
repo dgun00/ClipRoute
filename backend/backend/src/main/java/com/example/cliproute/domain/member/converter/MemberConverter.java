@@ -1,11 +1,11 @@
 package com.example.cliproute.domain.member.converter;
 
-import com.example.cliproute_project.domain.member.dto.res.MemberResDTO;
-import com.example.cliproute_project.domain.member.enums.TravelStatus;
-import com.example.cliproute_project.domain.member.repository.projection.MyCourseDetailFlat;
-import com.example.cliproute_project.domain.member.repository.projection.MyCourseListFlat;
-import com.example.cliproute_project.domain.member.repository.projection.MyCourseRegionOptionFlat;
-import com.example.cliproute_project.global.common.dto.SliceInfoDTO;
+import com.example.cliproute.domain.member.dto.res.MemberResDTO;
+import com.example.cliproute.domain.member.enums.TravelStatus;
+import com.example.cliproute.domain.member.repository.projection.MyCourseDetailFlat;
+import com.example.cliproute.domain.member.repository.projection.MyCourseListFlat;
+import com.example.cliproute.domain.member.repository.projection.MyCourseRegionOptionFlat;
+import com.example.cliproute.global.common.dto.SliceInfoDTO;
 
 import java.util.ArrayList;
 import java.util.Comparator;
