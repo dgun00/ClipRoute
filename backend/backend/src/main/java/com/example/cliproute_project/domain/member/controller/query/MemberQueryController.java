@@ -1,4 +1,4 @@
-package com.example.cliproute_project.domain.member.controller.query;
+﻿package com.example.cliproute_project.domain.member.controller.query;
 
 import com.example.cliproute_project.domain.member.dto.res.MemberResDTO;
 import com.example.cliproute_project.domain.member.enums.TravelStatus;
@@ -23,7 +23,7 @@ public class MemberQueryController implements MemberQueryControllerDocs {
 
     private final MemberQueryService memberQueryService;
 
-    // [6 API] ?�롭?�운 ?�소 fetch
+    // [6 API] 내 코스 필터 옵션 조회
     @GetMapping("/filters")
     public ApiResponse<MemberResDTO.FilterOptionsDTO> getMyCourseFilterOptions(
             @RequestHeader(value = "X-MEMBER-ID", required = false) Long memberId,
@@ -40,7 +40,7 @@ public class MemberQueryController implements MemberQueryControllerDocs {
                 response
         );
     }
-    // [7 API]  ??코스 리스??조회
+    // [7 API] 내 코스 리스트 조회
     @GetMapping
     public ApiResponse<MemberResDTO.MyCourseListDTO> getMyCourses(
             @RequestHeader(value = "X-MEMBER-ID", required = false) Long memberId,
@@ -59,7 +59,7 @@ public class MemberQueryController implements MemberQueryControllerDocs {
                 response
         );
     }
-    // [9 API] ??코스 ?�세 조회 (보기 모드)
+    // [9 API] 내 코스 상세 조회 (보기 모드)
     @GetMapping("/{courseId}")
     public ApiResponse<MemberResDTO.MyCourseDetailDTO> getMyCourseDetail(
             @RequestHeader(value = "X-MEMBER-ID", required = false) Long memberId,
