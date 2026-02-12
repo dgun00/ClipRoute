@@ -6,7 +6,7 @@ plugins {
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
-description = 'backend'
+description = 'CLIPROUTE_project'
 
 java {
     toolchain {
@@ -25,33 +25,22 @@ repositories {
 }
 
 dependencies {
-    // 공통 및 기존 설정
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
-
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    // JWT 설정
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-
-    //QueryDSL : 복잡한 DB 쿼리용
+    // QueryDSL : OpenFeign
     implementation "io.github.openfeign.querydsl:querydsl-jpa:7.0"
     implementation "io.github.openfeign.querydsl:querydsl-core:7.0"
     annotationProcessor "io.github.openfeign.querydsl:querydsl-apt:7.0:jpa"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 
-    //Swagger : API 문서 자동화
+    // Swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
 }
 
@@ -59,21 +48,21 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-// QueryDSL 자동 생성 설정
+// QueryDSL 관련 설정
+// generated/querydsl 폴더 생성 & 삽입
 def querydslDir = layout.buildDirectory.dir("generated/querydsl").get().asFile
 
+// 소스 세트에 생성 경로 추가 (구체적인 경로 지정)
 sourceSets {
     main.java.srcDirs += [ querydslDir ]
 }
 
+// 컴파일 시 생성 경로 지정
 tasks.withType(JavaCompile).configureEach {
     options.generatedSourceOutputDirectory.set(querydslDir)
 }
 
+// clean 태스크에 생성 폴더 삭제 로직 추가
 clean.doLast {
     file(querydslDir).deleteDir()
-}
-
-jar {
-    enabled = false
 }
