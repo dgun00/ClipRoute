@@ -31,7 +31,7 @@ public class CourseCommandServiceImpl implements CourseCommandService{
 
     @Transactional
     // [5 API]
-    public CourseResDTO.ScrapResultDTO scrapCourse(Long memberId, Long courseId, CourseReqDTO.CourseDateRequestDTO travelPeriod) {
+    public CourseResDTO.ScrapResultDTO scrapCourse(String email, Long courseId, CourseReqDTO.CourseDateRequestDTO travelPeriod) {
 
 //        // 만약 travelPeriod가 null이면 기본 객체 생성해서 사용
 //        if (travelPeriod == null) {
@@ -39,15 +39,18 @@ public class CourseCommandServiceImpl implements CourseCommandService{
 //                    null,null
 //            );
 //        }
+        // 1. 이메일로 Member 엔티티 조회 (가장 먼저 해야 함)
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+
+        // 2. 이후 로직에서 사용할 memberId 추출
+        Long memberId = member.getId();
 
         final CourseReqDTO.CourseDateRequestDTO effectiveTravelPeriod = (travelPeriod == null)
                 ? new CourseReqDTO.CourseDateRequestDTO(null, null)
                 : travelPeriod;
 
         // auth 미인증 예외 처리
-        if (memberId == null){
-            throw new MemberException(MemberErrorCode.UNAUTHORIZED);
-        }
         if (courseId == null || courseId <= 0) {
             throw new CourseException(CourseErrorCode.INVALID_COURSE_ID);
         }
@@ -66,23 +69,23 @@ public class CourseCommandServiceImpl implements CourseCommandService{
         //     여기서 반드시 originalId를 넘겨야 함)
         return memberCourseRepository.findActiveScrapByCourseId(memberId, originalId)
                 .map(existing -> toScrapResult(existing.getCourse().getId(), originalId, existing,effectiveTravelPeriod))
-                .orElseGet(() -> createScrap(memberId, original, effectiveTravelPeriod));
+                .orElseGet(() -> createScrap(member, original, effectiveTravelPeriod));
     }
 
 
     // [5 API]
-    private CourseResDTO.ScrapResultDTO createScrap(Long memberId, Course original,CourseReqDTO.CourseDateRequestDTO travelPeriod) {
+    private CourseResDTO.ScrapResultDTO createScrap(Member member, Course original,CourseReqDTO.CourseDateRequestDTO travelPeriod) {
 
-        // Member 존재 확인 (없으면 예외로 변환)
-        Member memberRef = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.INVALID_MEMBER_ID));
+//        // Member 존재 확인 (없으면 예외로 변환)
+//        Member memberRef = memberRepository.findById(memberId)
+//                .orElseThrow(() -> new MemberException(MemberErrorCode.INVALID_MEMBER_ID));
 
         // Course 생성 (원본 복제 + originalCourse 설정)
-        Course newCourse = Course.createScrappedFrom(original, memberRef);
+        Course newCourse = Course.createScrappedFrom(original, member);
         courseRepository.save(newCourse);
 
         // MemberCourse 생성
-        MemberCourse memberCourse = MemberCourse.createScrap(memberRef, newCourse, TravelStatus.BEFORE, travelPeriod);
+        MemberCourse memberCourse = MemberCourse.createScrap(member, newCourse, TravelStatus.BEFORE, travelPeriod);
         memberCourseRepository.save(memberCourse);
 
         return toScrapResult(newCourse.getId(), original.getId(), memberCourse, travelPeriod );

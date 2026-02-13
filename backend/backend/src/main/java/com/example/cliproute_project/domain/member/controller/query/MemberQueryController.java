@@ -4,6 +4,7 @@ import com.example.cliproute_project.domain.member.dto.res.MemberResDTO;
 import com.example.cliproute_project.domain.member.enums.TravelStatus;
 import com.example.cliproute_project.domain.member.exception.code.MemberSuccessCode;
 import com.example.cliproute_project.domain.member.service.query.MemberQueryService;
+import com.example.cliproute_project.domain.course.exception.code.CourseSuccessCode;
 import com.example.cliproute_project.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,7 @@ public class MemberQueryController implements MemberQueryControllerDocs {
 
     private final MemberQueryService memberQueryService;
 
-    // [6 API] 내 코스 필터 옵션 조회
+    // [6 API] 드롭다운 요소 fetch
     @GetMapping("/filters")
     public ApiResponse<MemberResDTO.FilterOptionsDTO> getMyCourseFilterOptions(
             @RequestHeader(value = "X-MEMBER-ID", required = false) Long memberId,
@@ -40,7 +41,7 @@ public class MemberQueryController implements MemberQueryControllerDocs {
                 response
         );
     }
-    // [7 API] 내 코스 리스트 조회
+    // [7 API]  내 코스 리스트 조회
     @GetMapping
     public ApiResponse<MemberResDTO.MyCourseListDTO> getMyCourses(
             @RequestHeader(value = "X-MEMBER-ID", required = false) Long memberId,
@@ -68,8 +69,9 @@ public class MemberQueryController implements MemberQueryControllerDocs {
         MemberResDTO.MyCourseDetailDTO response = memberQueryService.getMyCourseDetail(memberId, courseId);
 
         return ApiResponse.onSuccess(
-                MemberSuccessCode.MY_COURSE_DETAIL_FETCH_SUCCESS,
+                CourseSuccessCode.COURSE_DETAIL_FETCH_SUCCESS,
                 response
         );
     }
 }
+

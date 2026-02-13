@@ -125,4 +125,3 @@ public class MemberQueryServiceImpl implements MemberQueryService {
         return MemberConverter.toMyCourseDetailDTO(flats);
     }
 }
-

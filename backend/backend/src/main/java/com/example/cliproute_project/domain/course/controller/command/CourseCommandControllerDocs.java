@@ -23,7 +23,7 @@ public interface CourseCommandControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COURSE404_1", description = "Course not found.")
     })
     ApiResponse<CourseResDTO.ScrapResultDTO> scrapCourse(
-             Long memberId,
+             String email,
              Long courseId,
              CourseReqDTO.CourseDateRequestDTO travelPeriod
     );

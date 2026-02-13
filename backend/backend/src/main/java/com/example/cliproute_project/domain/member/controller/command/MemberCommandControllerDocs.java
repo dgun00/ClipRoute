@@ -8,10 +8,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 public interface MemberCommandControllerDocs {
 
-    // [8 API]
+    // [8번 API]
     @Operation(
             summary = "[8 API] My course delete",
-            description = "Soft deletes member course and course places; course is soft deleted only when customized. Returns deletedAt."
+            description = "Soft deletes my course and returns deletedAt."
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Swagger response"),
