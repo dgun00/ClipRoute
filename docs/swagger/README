@@ -1,0 +1,5 @@
+스웨거 문서화 (정적파일 뽑는법)
+서버실행(로컬)
+curl -o docs/swagger/swagger.json http://localhost:8080/v3/api-docs
+
+npx @redocly/cli build-docs docs/swagger/swagger.json -o docs/swagger/index.html
