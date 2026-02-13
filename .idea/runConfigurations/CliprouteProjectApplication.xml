@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="CliprouteProjectApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <option name="ALTERNATIVE_JRE_PATH" value="ms-17" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <envs>
+      <env name="DB_PASSWORD" value="cliproute123!" />
+      <env name="DB_URL" value="jdbc:mysql://cliproute-test-db.c7yeak4gelqv.ap-northeast-2.rds.amazonaws.com:3306/cliproute_test" />
+      <env name="DB_USERNAME" value="admin" />
+      <env name="JWT_SECRET" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImlhdCI6MTUxNjIzOTAyMn0.KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30" />
+    </envs>
+    <module name="CLIPROUTE_project.main" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.example.cliproute_project.CliprouteProjectApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

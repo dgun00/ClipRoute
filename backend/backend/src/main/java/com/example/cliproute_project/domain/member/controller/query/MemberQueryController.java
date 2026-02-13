@@ -1,4 +1,4 @@
-﻿package com.example.cliproute_project.domain.member.controller.query;
+package com.example.cliproute_project.domain.member.controller.query;
 
 import com.example.cliproute_project.domain.member.dto.res.MemberResDTO;
 import com.example.cliproute_project.domain.member.enums.TravelStatus;

@@ -1,4 +1,4 @@
-﻿package com.example.cliproute_project.domain.course.service.command;
+package com.example.cliproute_project.domain.course.service.command;
 
 import com.example.cliproute_project.domain.course.dto.req.CourseReqDTO;
 import com.example.cliproute_project.domain.course.entity.Course;

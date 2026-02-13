@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.lang.reflect.Constructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,27 +49,41 @@ class MemberCommandServiceImplTest {
     @InjectMocks
     private MemberCommandServiceImpl memberCommandService;
 
+    // 주드의 설계를 지키면서 객체를 생성하기 위한 도우미 메서드
+    private <T> T createInstance(Class<T> clazz) {
+        try {
+            Constructor<T> constructor = clazz.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            return constructor.newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("테스트 객체 생성 실패: " + clazz.getName(), e);
+        }
+    }
     @Test
     void editMyCourseDetail_success_updates_and_returns_detail() {
         Long memberId = 1L;
         Long courseId = 10L;
 
-        Course course = new Course();
+        //Course course = new Course();
+        Course course = createInstance(Course.class);
         ReflectionTestUtils.setField(course, "id", courseId);
         ReflectionTestUtils.setField(course, "isCustomized", true);
         ReflectionTestUtils.setField(course, "deletedAt", null);
         ReflectionTestUtils.setField(course, "title", "old-title");
         ReflectionTestUtils.setField(course, "travelDays", 1);
 
-        MemberCourse memberCourse = new MemberCourse();
+        //MemberCourse memberCourse = new MemberCourse();
+        MemberCourse memberCourse = createInstance(MemberCourse.class);
         ReflectionTestUtils.setField(memberCourse, "course", course);
         ReflectionTestUtils.setField(memberCourse, "deletedAt", null);
 
-        CoursePlace existingPlace = new CoursePlace();
+        //CoursePlace existingPlace = new CoursePlace();
+        CoursePlace existingPlace = createInstance(CoursePlace.class);
         ReflectionTestUtils.setField(existingPlace, "id", 1001L);
         ReflectionTestUtils.setField(existingPlace, "course", course);
 
-        Place newPlace = new Place();
+        //Place newPlace = new Place();
+        Place newPlace = createInstance(Place.class);
         ReflectionTestUtils.setField(newPlace, "id", 701L);
 
         when(memberCourseRepository.existsMyCourseDetailScope(memberId, courseId)).thenReturn(true);
@@ -111,11 +126,13 @@ class MemberCommandServiceImplTest {
         Long memberId = 1L;
         Long courseId = 10L;
 
-        Course course = new Course();
+//        Course course = new Course();
+        Course course = createInstance(Course.class);
         ReflectionTestUtils.setField(course, "id", courseId);
         ReflectionTestUtils.setField(course, "isCustomized", true);
 
-        MemberCourse memberCourse = new MemberCourse();
+//        MemberCourse memberCourse = new MemberCourse();
+        MemberCourse memberCourse = createInstance(MemberCourse.class);
         ReflectionTestUtils.setField(memberCourse, "course", course);
         ReflectionTestUtils.setField(memberCourse, "deletedAt", null);
 
@@ -144,11 +161,13 @@ class MemberCommandServiceImplTest {
         Long memberId = 1L;
         Long courseId = 10L;
 
-        Course course = new Course();
+//        Course course = new Course();
+        Course course = createInstance(Course.class);
         ReflectionTestUtils.setField(course, "id", courseId);
         ReflectionTestUtils.setField(course, "isCustomized", true);
 
-        MemberCourse memberCourse = new MemberCourse();
+//        MemberCourse memberCourse = new MemberCourse();
+        MemberCourse memberCourse = createInstance(MemberCourse.class);
         ReflectionTestUtils.setField(memberCourse, "course", course);
         ReflectionTestUtils.setField(memberCourse, "deletedAt", null);
 

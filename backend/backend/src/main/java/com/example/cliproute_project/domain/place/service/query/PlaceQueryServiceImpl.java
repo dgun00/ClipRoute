@@ -13,8 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.cliproute.domain.member.exception.MemberException;
-import com.example.cliproute.domain.member.exception.code.MemberErrorCode;
+import com.example.cliproute_project.domain.member.exception.MemberException;
+import com.example.cliproute_project.domain.member.exception.code.MemberErrorCode;
 
 @Service
 @RequiredArgsConstructor
