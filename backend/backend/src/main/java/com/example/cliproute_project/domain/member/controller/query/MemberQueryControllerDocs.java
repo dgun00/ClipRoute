@@ -16,10 +16,12 @@ public interface MemberQueryControllerDocs {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Swagger response"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "MYCOURSE200_1", description = "My course filter options fetched successfully."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "AUTH401_1", description = "Unauthorized")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "MEMBER401_1", description = "Authentication required."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "MEMBER_COURSE400_2", description = "Invalid region id."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "MEMBER_COURSE400_3", description = "Invalid travel days.")
     })
     ApiResponse<MemberResDTO.FilterOptionsDTO> getMyCourseFilterOptions(
-            Long memberId,
+            String token, // Long memberId -> String token 변경
             Long regionId,
             Integer travelDays,
             TravelStatus travelStatus
@@ -32,10 +34,12 @@ public interface MemberQueryControllerDocs {
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Swagger response"),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "MYCOURSE200_2", description = "My course list fetched successfully."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "AUTH401_1", description = "Unauthorized")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "MEMBER401_1", description = "Authentication required."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "MEMBER_COURSE400_2", description = "Invalid region id."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "MEMBER_COURSE400_3", description = "Invalid travel days.")
     })
     ApiResponse<MemberResDTO.MyCourseListDTO> getMyCourses(
-            Long memberId,
+            String token,
             Long regionId,
             Integer travelDays,
             TravelStatus travelStatus,
@@ -49,13 +53,14 @@ public interface MemberQueryControllerDocs {
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Swagger response"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "COURSE200_3", description = "Course details fetch success."),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "AUTH401_1", description = "Unauthorized"),
-            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "AUTH403_1", description = "Forbidden")
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "MYCOURSE200_3", description = "My course detail fetched successfully."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "MEMBER401_1", description = "Authentication required."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "MEMBER_COURSE400_1", description = "Invalid course id."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "MEMBER_COURSE403_1", description = "Access denied for this course."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "MEMBER_COURSE404_1", description = "My course not found.")
     })
     ApiResponse<MemberResDTO.MyCourseDetailDTO> getMyCourseDetail(
-            Long memberId,
+            String token,
             Long courseId
     );
 }
-

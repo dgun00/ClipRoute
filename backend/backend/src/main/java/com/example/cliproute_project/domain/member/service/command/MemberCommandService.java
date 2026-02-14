@@ -5,11 +5,11 @@ import com.example.cliproute_project.domain.member.dto.req.MemberReqDTO;
 
 public interface MemberCommandService {
     // [8 API]
-    MemberResDTO.MyCourseDeleteResultDTO deleteMyCourse(Long memberId, Long courseId);
+    MemberResDTO.MyCourseDeleteResultDTO deleteMyCourse(String email, Long courseId);
 
     // [10 API]
     MemberResDTO.MyCourseDetailDTO editMyCourseDetail(
-            Long memberId,
+            String email,
             Long courseId,
             MemberReqDTO.MyCourseDetailEditDTO request
     );

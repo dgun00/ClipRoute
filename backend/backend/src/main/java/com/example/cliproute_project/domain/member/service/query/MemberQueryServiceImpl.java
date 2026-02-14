@@ -2,10 +2,12 @@ package com.example.cliproute_project.domain.member.service.query;
 
 import com.example.cliproute_project.domain.member.converter.MemberConverter;
 import com.example.cliproute_project.domain.member.dto.res.MemberResDTO;
+import com.example.cliproute_project.domain.member.entity.Member;
 import com.example.cliproute_project.domain.member.enums.TravelStatus;
 import com.example.cliproute_project.domain.member.exception.MemberException;
 import com.example.cliproute_project.domain.member.exception.code.MemberCourseErrorCode;
 import com.example.cliproute_project.domain.member.exception.code.MemberErrorCode;
+import com.example.cliproute_project.domain.member.repository.member.MemberRepository;
 import com.example.cliproute_project.domain.member.repository.membercourse.MemberCourseRepository;
 import com.example.cliproute_project.domain.member.repository.projection.MyCourseDetailFlat;
 import com.example.cliproute_project.domain.member.repository.projection.MyCourseListFlat;
@@ -27,18 +29,21 @@ import java.util.List;
 public class MemberQueryServiceImpl implements MemberQueryService {
 
     private final MemberCourseRepository memberCourseRepository;
+    private final MemberRepository memberRepository;
 
     @Override
     // [6 API] My course filter options
     public MemberResDTO.FilterOptionsDTO getMyCourseFilterOptions(
-            Long memberId,
+            String email,
             Long regionId,
             Integer travelDays,
             TravelStatus travelStatus
     ) {
-        if (memberId == null) {
-            throw new MemberException(MemberErrorCode.UNAUTHORIZED);
-        }
+        // 이메일로 회원 조회
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        Long memberId = member.getId();
+
         if (regionId != null && regionId <= 0) {
             throw new MemberException(MemberCourseErrorCode.INVALID_REGION_ID);
         }
@@ -62,16 +67,18 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     @Override
     // [7 API] My course list
     public MemberResDTO.MyCourseListDTO getMyCourses(
-            Long memberId,
+            String email,
             Long regionId,
             Integer travelDays,
             TravelStatus travelStatus,
             Long lastMemberCourseId,
             Integer pageSize
     ) {
-        if (memberId == null) {
-            throw new MemberException(MemberErrorCode.UNAUTHORIZED);
-        }
+        // 이메일로 회원 조회
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        Long memberId = member.getId();
+
         if (regionId != null && regionId <= 0) {
             throw new MemberException(MemberCourseErrorCode.INVALID_REGION_ID);
         }
@@ -104,10 +111,12 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
     @Override
     // [9 API] My course detail
-    public MemberResDTO.MyCourseDetailDTO getMyCourseDetail(Long memberId, Long courseId) {
-        if (memberId == null) {
-            throw new MemberException(MemberErrorCode.UNAUTHORIZED);
-        }
+    public MemberResDTO.MyCourseDetailDTO getMyCourseDetail(String email, Long courseId) {
+        // 이메일로 회원 조회
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        Long memberId = member.getId();
+
         if (courseId == null || courseId <= 0) {
             throw new MemberException(MemberCourseErrorCode.INVALID_COURSE_ID);
         }

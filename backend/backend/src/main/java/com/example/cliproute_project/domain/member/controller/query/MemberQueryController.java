@@ -1,10 +1,10 @@
 package com.example.cliproute_project.domain.member.controller.query;
 
+import com.example.cliproute_project.domain.auth.util.JwtUtil;
 import com.example.cliproute_project.domain.member.dto.res.MemberResDTO;
 import com.example.cliproute_project.domain.member.enums.TravelStatus;
 import com.example.cliproute_project.domain.member.exception.code.MemberSuccessCode;
 import com.example.cliproute_project.domain.member.service.query.MemberQueryService;
-import com.example.cliproute_project.domain.course.exception.code.CourseSuccessCode;
 import com.example.cliproute_project.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -23,17 +23,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberQueryController implements MemberQueryControllerDocs {
 
     private final MemberQueryService memberQueryService;
+    private final JwtUtil jwtUtil; // JwtUtil 주입
 
-    // [6 API] 드롭다운 요소 fetch
+    // [6 API] 내 코스 필터 옵션 조회
     @GetMapping("/filters")
     public ApiResponse<MemberResDTO.FilterOptionsDTO> getMyCourseFilterOptions(
-            @RequestHeader(value = "X-MEMBER-ID", required = false) Long memberId,
+            @RequestHeader("Authorization") String token,
             @RequestParam(required = false) Long regionId,
             @RequestParam(required = false) Integer travelDays,
             @RequestParam(required = false) TravelStatus travelStatus
     ) {
+        String email = jwtUtil.getUserInfoFromToken(token.substring(7));
         MemberResDTO.FilterOptionsDTO response = memberQueryService.getMyCourseFilterOptions(
-                memberId, regionId, travelDays, travelStatus
+                email, regionId, travelDays, travelStatus
         );
 
         return ApiResponse.onSuccess(
@@ -41,18 +43,20 @@ public class MemberQueryController implements MemberQueryControllerDocs {
                 response
         );
     }
-    // [7 API]  내 코스 리스트 조회
+
+    // [7 API] 내 코스 리스트 조회
     @GetMapping
     public ApiResponse<MemberResDTO.MyCourseListDTO> getMyCourses(
-            @RequestHeader(value = "X-MEMBER-ID", required = false) Long memberId,
+            @RequestHeader("Authorization") String token,
             @RequestParam(required = false) Long regionId,
             @RequestParam(required = false) Integer travelDays,
             @RequestParam(required = false) TravelStatus travelStatus,
             @RequestParam(required = false) Long lastMemberCourseId,
             @RequestParam(required = false, defaultValue = "5") Integer pageSize
     ) {
+        String email = jwtUtil.getUserInfoFromToken(token.substring(7));
         MemberResDTO.MyCourseListDTO response = memberQueryService.getMyCourses(
-                memberId, regionId, travelDays, travelStatus, lastMemberCourseId, pageSize
+                email, regionId, travelDays, travelStatus, lastMemberCourseId, pageSize
         );
 
         return ApiResponse.onSuccess(
@@ -60,18 +64,19 @@ public class MemberQueryController implements MemberQueryControllerDocs {
                 response
         );
     }
-    // [9 API] 내 코스 상세 조회 (보기 모드)
+
+    // [9 API] 내 코스 상세 조회
     @GetMapping("/{courseId}")
     public ApiResponse<MemberResDTO.MyCourseDetailDTO> getMyCourseDetail(
-            @RequestHeader(value = "X-MEMBER-ID", required = false) Long memberId,
+            @RequestHeader("Authorization") String token,
             @PathVariable Long courseId
     ) {
-        MemberResDTO.MyCourseDetailDTO response = memberQueryService.getMyCourseDetail(memberId, courseId);
+        String email = jwtUtil.getUserInfoFromToken(token.substring(7));
+        MemberResDTO.MyCourseDetailDTO response = memberQueryService.getMyCourseDetail(email, courseId);
 
         return ApiResponse.onSuccess(
-                CourseSuccessCode.COURSE_DETAIL_FETCH_SUCCESS,
+                MemberSuccessCode.MY_COURSE_DETAIL_FETCH_SUCCESS,
                 response
         );
     }
 }
-

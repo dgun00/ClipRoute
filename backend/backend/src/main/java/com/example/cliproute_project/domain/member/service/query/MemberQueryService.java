@@ -3,20 +3,19 @@ package com.example.cliproute_project.domain.member.service.query;
 import com.example.cliproute_project.domain.member.dto.res.MemberResDTO;
 import com.example.cliproute_project.domain.member.enums.TravelStatus;
 
-
 public interface MemberQueryService {
 
-    // [6 API] My course filter options
+    // [6 API] 내 코스 필터 옵션 조회
     MemberResDTO.FilterOptionsDTO getMyCourseFilterOptions(
-            Long memberId,
+            String email,
             Long regionId,
             Integer travelDays,
             TravelStatus travelStatus
     );
 
-    // [7 API] My course list
+    // [7 API] 내 코스 리스트 조회
     MemberResDTO.MyCourseListDTO getMyCourses(
-            Long memberId,
+            String email,
             Long regionId,
             Integer travelDays,
             TravelStatus travelStatus,
@@ -24,7 +23,6 @@ public interface MemberQueryService {
             Integer pageSize
     );
 
-    // [9 API] My course detail
-    MemberResDTO.MyCourseDetailDTO getMyCourseDetail(Long memberId, Long courseId);
+    // [9 API] 내 코스 상세 조회
+    MemberResDTO.MyCourseDetailDTO getMyCourseDetail(String email, Long courseId);
 }
-

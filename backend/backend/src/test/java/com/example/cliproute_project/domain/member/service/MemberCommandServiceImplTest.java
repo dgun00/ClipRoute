@@ -5,15 +5,18 @@ import com.example.cliproute_project.domain.course.entity.mapping.CoursePlace;
 import com.example.cliproute_project.domain.course.repository.CoursePlaceRepository;
 import com.example.cliproute_project.domain.member.dto.req.MemberReqDTO;
 import com.example.cliproute_project.domain.member.dto.res.MemberResDTO;
+import com.example.cliproute_project.domain.member.entity.Member;
 import com.example.cliproute_project.domain.member.entity.mapping.MemberCourse;
 import com.example.cliproute_project.domain.member.enums.TravelStatus;
 import com.example.cliproute_project.domain.member.exception.MemberException;
 import com.example.cliproute_project.domain.member.exception.code.MemberCourseErrorCode;
+import com.example.cliproute_project.domain.member.repository.member.MemberRepository;
 import com.example.cliproute_project.domain.member.repository.membercourse.MemberCourseRepository;
 import com.example.cliproute_project.domain.member.repository.projection.MyCourseDetailFlat;
 import com.example.cliproute_project.domain.member.service.command.MemberCommandServiceImpl;
 import com.example.cliproute_project.domain.place.entity.Place;
 import com.example.cliproute_project.domain.place.repository.PlaceRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,7 +33,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,10 +49,12 @@ class MemberCommandServiceImplTest {
     @Mock
     private PlaceRepository placeRepository;
 
-    @InjectMocks
-    private MemberCommandServiceImpl memberCommandService;
+    @Mock
+    private MemberRepository memberRepository; // 추가된 부분
 
-    // 주드의 설계를 지키면서 객체를 생성하기 위한 도우미 메서드
+    @InjectMocks
+    private MemberCommandServiceImpl memberCommandService; // 이름 확인
+
     private <T> T createInstance(Class<T> clazz) {
         try {
             Constructor<T> constructor = clazz.getDeclaredConstructor();
@@ -59,12 +64,22 @@ class MemberCommandServiceImplTest {
             throw new RuntimeException("테스트 객체 생성 실패: " + clazz.getName(), e);
         }
     }
+
+    private Member testMember;
+    private final String testEmail = "test@example.com";
+
+    @BeforeEach
+    void setUp() {
+        testMember = createInstance(Member.class);
+        ReflectionTestUtils.setField(testMember, "id", 1L);
+        ReflectionTestUtils.setField(testMember, "email", testEmail);
+    }
+
     @Test
     void editMyCourseDetail_success_updates_and_returns_detail() {
         Long memberId = 1L;
         Long courseId = 10L;
 
-        //Course course = new Course();
         Course course = createInstance(Course.class);
         ReflectionTestUtils.setField(course, "id", courseId);
         ReflectionTestUtils.setField(course, "isCustomized", true);
@@ -72,20 +87,19 @@ class MemberCommandServiceImplTest {
         ReflectionTestUtils.setField(course, "title", "old-title");
         ReflectionTestUtils.setField(course, "travelDays", 1);
 
-        //MemberCourse memberCourse = new MemberCourse();
         MemberCourse memberCourse = createInstance(MemberCourse.class);
         ReflectionTestUtils.setField(memberCourse, "course", course);
         ReflectionTestUtils.setField(memberCourse, "deletedAt", null);
 
-        //CoursePlace existingPlace = new CoursePlace();
         CoursePlace existingPlace = createInstance(CoursePlace.class);
         ReflectionTestUtils.setField(existingPlace, "id", 1001L);
         ReflectionTestUtils.setField(existingPlace, "course", course);
 
-        //Place newPlace = new Place();
         Place newPlace = createInstance(Place.class);
         ReflectionTestUtils.setField(newPlace, "id", 701L);
 
+        // Mock 설정 변경: 이메일로 멤버 찾기 추가
+        when(memberRepository.findByEmail(testEmail)).thenReturn(Optional.of(testMember));
         when(memberCourseRepository.existsMyCourseDetailScope(memberId, courseId)).thenReturn(true);
         when(memberCourseRepository.findByMemberIdAndCourseIdAndDeletedAtIsNull(memberId, courseId))
                 .thenReturn(Optional.of(memberCourse));
@@ -110,7 +124,8 @@ class MemberCommandServiceImplTest {
                 )
         );
 
-        MemberResDTO.MyCourseDetailDTO result = memberCommandService.editMyCourseDetail(memberId, courseId, request);
+        // 이메일 파라미터로 호출
+        MemberResDTO.MyCourseDetailDTO result = memberCommandService.editMyCourseDetail(testEmail, courseId, request);
 
         assertThat(result).isNotNull();
         assertThat(result.courseId()).isEqualTo(courseId);
@@ -126,16 +141,16 @@ class MemberCommandServiceImplTest {
         Long memberId = 1L;
         Long courseId = 10L;
 
-//        Course course = new Course();
         Course course = createInstance(Course.class);
         ReflectionTestUtils.setField(course, "id", courseId);
         ReflectionTestUtils.setField(course, "isCustomized", true);
 
-//        MemberCourse memberCourse = new MemberCourse();
         MemberCourse memberCourse = createInstance(MemberCourse.class);
         ReflectionTestUtils.setField(memberCourse, "course", course);
         ReflectionTestUtils.setField(memberCourse, "deletedAt", null);
 
+        // 추가
+        when(memberRepository.findByEmail(testEmail)).thenReturn(Optional.of(testMember));
         when(memberCourseRepository.existsMyCourseDetailScope(memberId, courseId)).thenReturn(true);
         when(memberCourseRepository.findByMemberIdAndCourseIdAndDeletedAtIsNull(memberId, courseId))
                 .thenReturn(Optional.of(memberCourse));
@@ -148,7 +163,8 @@ class MemberCommandServiceImplTest {
                 null
         );
 
-        assertThatThrownBy(() -> memberCommandService.editMyCourseDetail(memberId, courseId, request))
+        // 이메일로 호출
+        assertThatThrownBy(() -> memberCommandService.editMyCourseDetail(testEmail, courseId, request))
                 .isInstanceOf(MemberException.class)
                 .satisfies(ex -> {
                     MemberException me = (MemberException) ex;
@@ -161,16 +177,16 @@ class MemberCommandServiceImplTest {
         Long memberId = 1L;
         Long courseId = 10L;
 
-//        Course course = new Course();
         Course course = createInstance(Course.class);
         ReflectionTestUtils.setField(course, "id", courseId);
         ReflectionTestUtils.setField(course, "isCustomized", true);
 
-//        MemberCourse memberCourse = new MemberCourse();
         MemberCourse memberCourse = createInstance(MemberCourse.class);
         ReflectionTestUtils.setField(memberCourse, "course", course);
         ReflectionTestUtils.setField(memberCourse, "deletedAt", null);
 
+        // 추가
+        when(memberRepository.findByEmail(testEmail)).thenReturn(Optional.of(testMember));
         when(memberCourseRepository.existsMyCourseDetailScope(memberId, courseId)).thenReturn(true);
         when(memberCourseRepository.findByMemberIdAndCourseIdAndDeletedAtIsNull(memberId, courseId))
                 .thenReturn(Optional.of(memberCourse));
@@ -188,7 +204,8 @@ class MemberCommandServiceImplTest {
                 )
         );
 
-        assertThatThrownBy(() -> memberCommandService.editMyCourseDetail(memberId, courseId, request))
+        // 이메일로 호출
+        assertThatThrownBy(() -> memberCommandService.editMyCourseDetail(testEmail, courseId, request))
                 .isInstanceOf(MemberException.class)
                 .satisfies(ex -> {
                     MemberException me = (MemberException) ex;

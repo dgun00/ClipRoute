@@ -6,10 +6,12 @@ import com.example.cliproute_project.domain.course.repository.CoursePlaceReposit
 import com.example.cliproute_project.domain.member.converter.MemberConverter;
 import com.example.cliproute_project.domain.member.dto.req.MemberReqDTO;
 import com.example.cliproute_project.domain.member.dto.res.MemberResDTO;
+import com.example.cliproute_project.domain.member.entity.Member;
 import com.example.cliproute_project.domain.member.entity.mapping.MemberCourse;
 import com.example.cliproute_project.domain.member.exception.MemberException;
 import com.example.cliproute_project.domain.member.exception.code.MemberCourseErrorCode;
 import com.example.cliproute_project.domain.member.exception.code.MemberErrorCode;
+import com.example.cliproute_project.domain.member.repository.member.MemberRepository;
 import com.example.cliproute_project.domain.member.repository.membercourse.MemberCourseRepository;
 import com.example.cliproute_project.domain.member.repository.projection.MyCourseDetailFlat;
 import com.example.cliproute_project.domain.place.entity.Place;
@@ -36,13 +38,16 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private final MemberCourseRepository memberCourseRepository;
     private final CoursePlaceRepository coursePlaceRepository;
     private final PlaceRepository placeRepository;
+    private final MemberRepository memberRepository;
 
-    // [8 API]
+    // [8 API] 내 코스 삭제
     @Override
-    public MemberResDTO.MyCourseDeleteResultDTO deleteMyCourse(Long memberId, Long courseId) {
-        if (memberId == null) {
-            throw new MemberException(MemberErrorCode.UNAUTHORIZED);
-        }
+    public MemberResDTO.MyCourseDeleteResultDTO deleteMyCourse(String email, Long courseId) {
+        // 이메일로 회원 조회
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        Long memberId = member.getId();
+
         if (courseId == null || courseId <= 0) {
             throw new MemberException(MemberCourseErrorCode.INVALID_COURSE_ID);
         }
@@ -64,16 +69,18 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         return MemberConverter.toMyCourseDeleteResultDTO(courseId, deletedAt);
     }
 
-    // [10 API]
+    // [10 API] 내 코스 수정
     @Override
     public MemberResDTO.MyCourseDetailDTO editMyCourseDetail(
-            Long memberId,
+            String email,
             Long courseId,
             MemberReqDTO.MyCourseDetailEditDTO request
     ) {
-        if (memberId == null) {
-            throw new MemberException(MemberErrorCode.UNAUTHORIZED);
-        }
+        // 이메일로 회원 조회
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
+        Long memberId = member.getId();
+
         if (courseId == null || courseId <= 0) {
             throw new MemberException(MemberCourseErrorCode.INVALID_COURSE_ID);
         }
@@ -124,7 +131,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         return MemberConverter.toMyCourseDetailDTO(flats);
     }
 
-    // [10 API]
+    // [10 API] 날짜 유효성 검사 및 적용
     private void validateAndApplyTravelPeriod(
             MemberCourse memberCourse,
             Course course,
@@ -143,7 +150,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         course.updateTravelDays(travelDays);
     }
 
-    // [10 API]
+    // [10 API] 여행 일정(장소 리스트) 적용
     private void applyItineraries(
             Course course,
             List<MemberReqDTO.MyCourseItineraryEditDTO> itineraries
@@ -229,7 +236,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         }
     }
 
-    // [10 API]
+    // [10 API] 방문 일차 유효성 검사
     private void validateVisitDays(List<MemberReqDTO.MyCourseItineraryEditDTO> itineraries) {
         if (itineraries == null || itineraries.isEmpty()) {
             return;
@@ -261,7 +268,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         }
     }
 
-    // [10 API]
+    // [10 API] 아이템 유효성 검사
     private void validateItem(MemberReqDTO.MyCourseItemEditDTO item) {
         if (item == null) {
             throw new MemberException(MemberCourseErrorCode.INVALID_REQUEST);
@@ -273,7 +280,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         }
     }
 
-    // [10 API]
+    // [10 API] 장소 리스트 일괄 조회
     private Map<Long, Place> fetchPlaces(Set<Long> placeIds) {
         if (placeIds == null || placeIds.isEmpty()) {
             return Map.of();

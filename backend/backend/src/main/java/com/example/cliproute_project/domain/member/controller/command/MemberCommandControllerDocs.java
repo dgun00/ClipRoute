@@ -8,10 +8,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 public interface MemberCommandControllerDocs {
 
-    // [8번 API]
+    // [8 API]
     @Operation(
             summary = "[8 API] My course delete",
-            description = "Soft deletes my course and returns deletedAt."
+            description = "Soft deletes member course and course places; course is soft deleted only when customized. Returns deletedAt."
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Swagger response"),
@@ -21,7 +21,7 @@ public interface MemberCommandControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "MEMBER_COURSE404_1", description = "My course not found.")
     })
     ApiResponse<MemberResDTO.MyCourseDeleteResultDTO> deleteMyCourse(
-            Long memberId,
+            String token,
             Long courseId
     );
 
@@ -47,7 +47,7 @@ public interface MemberCommandControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "MEMBER_COURSE404_3", description = "Place not found.")
     })
     ApiResponse<MemberResDTO.MyCourseDetailDTO> editMyCourseDetail(
-            Long memberId,
+            String token,
             Long courseId,
             MemberReqDTO.MyCourseDetailEditDTO request
     );
