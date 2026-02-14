@@ -280,6 +280,7 @@ public class MemberCourseRepositoryImpl implements MemberCourseRepositoryCustom 
         return found != null;
     }
 
+    // [9,10 API]
     @Override
     public List<MyCourseDetailFlat> findMyCourseDetailFlats(Long memberId, Long courseId) {
         QMemberCourse mc = QMemberCourse.memberCourse;
