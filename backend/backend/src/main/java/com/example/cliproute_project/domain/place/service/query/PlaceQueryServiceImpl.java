@@ -1,5 +1,6 @@
 package com.example.cliproute_project.domain.place.service.query;
 
+import com.example.cliproute_project.domain.member.repository.member.MemberRepository;
 import com.example.cliproute_project.domain.place.converter.PlaceConverter;
 import com.example.cliproute_project.domain.place.dto.res.PlaceResDTO;
 import com.example.cliproute_project.domain.place.entity.Place;
@@ -27,10 +28,11 @@ public class PlaceQueryServiceImpl implements PlaceQueryService {
     private static final double MAX_LNG = 180.0;
 
     private final PlaceRepository placeRepository;
+    private final MemberRepository memberRepository;
 
     @Override
     public PlaceResDTO.PlaceSearchResDTO searchPlacesByViewport(
-            Long memberId,
+            String email,
             Long regionId,
             String category,
             Double minLat,
@@ -40,9 +42,11 @@ public class PlaceQueryServiceImpl implements PlaceQueryService {
             Integer page,
             Integer size
     ) {
-        if (memberId == null) {
+        if (email == null) {
             throw new MemberException(MemberErrorCode.UNAUTHORIZED);
         }
+        memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND));
         Integer resolvedPage = page != null ? page : 0;
         Integer resolvedSize = size != null ? size : 20;
         if (resolvedPage < 0 || resolvedSize <= 0) {

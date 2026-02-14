@@ -23,7 +23,7 @@ public interface PlaceQueryControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "PLACE400_6", description = "No search condition.")
     })
     ApiResponse<PlaceResDTO.PlaceSearchResDTO> searchPlaces(
-            @Parameter(hidden = true) Long memberId, // [수정] 컨트롤러와 형식을 맞추기 위해 추가
+            String token,
             Long regionId,
             String category,
             Double minLat,

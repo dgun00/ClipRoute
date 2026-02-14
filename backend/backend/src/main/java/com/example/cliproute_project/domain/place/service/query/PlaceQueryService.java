@@ -6,7 +6,7 @@ public interface PlaceQueryService {
 
     // [11 API] Available places search
     PlaceResDTO.PlaceSearchResDTO searchPlacesByViewport(
-            Long memberId,
+            String email,
             Long regionId,
             String category,
             Double minLat,
