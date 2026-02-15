@@ -28,11 +28,22 @@ public enum MemberSuccessCode implements BaseSuccessCode {
             "MYCOURSE200_4",
             "My course deleted successfully."
     ),
-    // [10 API]
     MY_COURSE_DETAIL_EDIT_SUCCESS(
             HttpStatus.OK,
             "MYCOURSE200_5",
             "My course detail edited successfully."
+    ), 
+
+
+    MEMBER_UPDATE_SUCCESS(
+            HttpStatus.OK,
+            "MEMBER200_1",
+            "Member profile updated successfully."
+    ),
+    MEMBER_INFO_FETCH_SUCCESS(
+            HttpStatus.OK,
+            "MEMBER200_2",
+            "Member info fetched successfully."
     );
 
     private final HttpStatus status;

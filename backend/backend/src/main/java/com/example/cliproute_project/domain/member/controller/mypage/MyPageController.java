@@ -3,7 +3,9 @@ package com.example.cliproute_project.domain.member.controller.mypage;
 import com.example.cliproute_project.domain.auth.util.JwtUtil;
 import com.example.cliproute_project.domain.member.dto.req.ProfileUpdateReqDTO;
 import com.example.cliproute_project.domain.member.dto.res.MyPageResDTO;
+import com.example.cliproute_project.domain.member.exception.code.MemberSuccessCode;
 import com.example.cliproute_project.domain.member.service.mypage.MyPageService;
+import com.example.cliproute_project.global.apiPayload.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,27 +15,32 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class MyPageController {
     private final MyPageService myPageService;
-    private final JwtUtil jwtUtil; // 토큰 해석을 위해 주입
+    private final JwtUtil jwtUtil;
 
     @GetMapping("/me")
-    public ResponseEntity<MyPageResDTO> getMyPage(@RequestHeader("Authorization") String token) {
-        // "Bearer " 접두어 제거 후 이메일 추출
-        String jwt = token.substring(7);
-        String email = jwtUtil.getUserInfoFromToken(jwt);
+    public ApiResponse<MyPageResDTO> getMyPage(@RequestHeader("Authorization") String token) {
+        String email = jwtUtil.getUserInfoFromToken(token.substring(7));
+        MyPageResDTO response = myPageService.getMyInfo(email);
 
-        return ResponseEntity.ok(myPageService.getMyInfo(email));
+        return ApiResponse.onSuccess(
+                MemberSuccessCode.MEMBER_INFO_FETCH_SUCCESS,
+                response
+        );
     }
 
     @PatchMapping("/me")
-    public ResponseEntity<String> updateProfile(
+    public ApiResponse<MyPageResDTO> updateProfile(
             @RequestHeader("Authorization") String token,
             @RequestBody ProfileUpdateReqDTO request) {
 
-        String jwt = token.substring(7);
-        String email = jwtUtil.getUserInfoFromToken(jwt);
+        String email = jwtUtil.getUserInfoFromToken(token.substring(7));
 
-        myPageService.updateProfile(email, request);
-        return ResponseEntity.ok("프로필 정보가 수정되었습니다.");
+        MyPageResDTO result = myPageService.updateProfile(email, request);
+
+        return ApiResponse.onSuccess(
+                MemberSuccessCode.MEMBER_UPDATE_SUCCESS,
+                result
+        );
     }
 
 //    @PostMapping("/logout")
@@ -44,7 +51,6 @@ public class MyPageController {
 //    }
     @PostMapping("/logout")
     public ResponseEntity<String> logout() {
-        System.out.println("=== 로그아웃 컨트롤러 진입 성공! ==="); // 이 줄이 찍히는지 보세요
         return ResponseEntity.ok("로그아웃 완료");
     }
 

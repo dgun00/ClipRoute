@@ -293,29 +293,30 @@ public class MemberCourseRepositoryImpl implements MemberCourseRepositoryCustom 
         return queryFactory
                 .select(Projections.constructor(
                         MyCourseDetailFlat.class,
-                        c.id,
-                        v.title,
-                        v.ytVideoId,
-                        v.thumbnailUrl,
-                        v.channelName,
-                        r.id,
-                        r.regionName,
-                        mc.isScrapped,
-                        mc.travelStatus,
-                        c.title,
-                        mc.startDate,
-                        mc.endDate,
-                        cp.visitDay,
-                        cp.visitOrder,
-                        cp.id,
-                        p.id,
-                        p.placeName,
-                        p.placeCategory,
-                        p.address,
-                        p.lat,
-                        p.lng,
-                        vp.timestamp,
-                        p.deletedAt
+                        c.id,                        // 1. courseId (Long)
+                        c.title,                     // 2. courseTitle (String)
+                        r.regionName,                // 3. regionName (String)
+                        r.imageUrl,                  // 4. regionRepImageUrl (String)
+                        v.thumbnailUrl,              // 5. thumbnailUrl (String)
+                        mc.id,                       // 6. memberCourseId (Long)
+                        mc.member.nickname,          // 7. nickname (String)
+                        mc.member.id.eq(memberId),   // 8. isMine (Boolean)
+                        mc.travelStatus,             // 9. travelStatus (Enum)
+                        c.description,               // 10. memo (String)
+                        mc.startDate,                // 11. startDate (LocalDate)
+                        mc.endDate,                  // 12. endDate (LocalDate)
+                        c.travelDays,                // 13. travelDays (Integer)
+                        com.querydsl.core.types.dsl.Expressions.asNumber(0).as("likeCount"),  // 14. Integer
+                        com.querydsl.core.types.dsl.Expressions.asNumber(0L).as("scrapCount"), // 15. Long
+
+                        cp.id,                       // 16. coursePlaceId (Long)
+                        p.placeName,                 // 17. placeName (String)
+                        p.placeCategory,             // 18. placeCategory (Enum)
+                        p.address,                   // 19. address (String)
+                        p.lat,                       // 20. latitude (Double)
+                        p.lng,                       // 21. longitude (Double)
+                        cp.visitDay,                 // 22. visitDay (Integer)
+                        p.updatedAt                  // 23. updatedAt (LocalDateTime)
                 ))
                 .from(c)
                 .join(c.region, r)

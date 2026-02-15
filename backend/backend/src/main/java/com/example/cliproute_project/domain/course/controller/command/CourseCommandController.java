@@ -28,7 +28,7 @@ public class CourseCommandController implements CourseCommandControllerDocs {
             @PathVariable Long courseId,
             @RequestBody (required = false)CourseReqDTO.CourseDateRequestDTO travelPeriod
             ) {
-        String jwt = token.substring(7); // "Bearer " 제거
+        String jwt = token.substring(7);
         String email = jwtUtil.getUserInfoFromToken(jwt);
 
         CourseResDTO.ScrapResultDTO response = courseCommandService.scrapCourse(email, courseId, travelPeriod);

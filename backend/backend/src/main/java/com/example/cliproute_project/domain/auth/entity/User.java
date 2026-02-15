@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
+@Setter
 public class User {
 
     @Id
@@ -69,7 +70,7 @@ public class User {
     }
     public void updateStatus(MemberStatus status) {
         this.status = status;
-        // 만약 상태가 DELETED로 변경되면 탈퇴 시간을 현재로 기록
+
         if (status == MemberStatus.DELETED) {
             this.deletedAt = LocalDateTime.now();
         }

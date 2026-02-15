@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberQueryController implements MemberQueryControllerDocs {
 
     private final MemberQueryService memberQueryService;
-    private final JwtUtil jwtUtil; // JwtUtil 주입
+    private final JwtUtil jwtUtil;
 
     // [6 API] 내 코스 필터 옵션 조회
     @GetMapping("/filters")

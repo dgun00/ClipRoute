@@ -32,23 +32,27 @@ public class MyPageService {
     }
 
     @Transactional
-    public void updateProfile(String currentEmail, ProfileUpdateReqDTO request) {
+    public MyPageResDTO updateProfile(String currentEmail, ProfileUpdateReqDTO request) {
         User user = userRepository.findByEmail(currentEmail)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
-        // 비밀번호 수정
         if (request.getPassword() != null && !request.getPassword().isEmpty()) {
-            String encodedPassword = passwordEncoder.encode(request.getPassword());
-            user.updatePassword(encodedPassword);
+            user.updatePassword(passwordEncoder.encode(request.getPassword()));
         }
 
-        // 프로필 정보 업데이트
         user.updateProfile(
                 request.getNickname(),
                 request.getEmail(),
                 request.getGender() != null ? Gender.valueOf(request.getGender()) : null,
                 request.getAgeRange() != null ? AgeRange.valueOf(request.getAgeRange()) : null
         );
+
+        return MyPageResDTO.builder()
+                .email(user.getEmail())
+                .nickname(user.getNickname())
+                .gender(user.getGender().name())
+                .ageRange(user.getAgeRange().name())
+                .build();
     }
     @Transactional
     public void withdraw(String email) {

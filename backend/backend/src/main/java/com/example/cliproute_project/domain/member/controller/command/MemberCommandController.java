@@ -24,12 +24,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberCommandController implements MemberCommandControllerDocs {
 
     private final MemberCommandService memberCommandService;
-    private final JwtUtil jwtUtil; // JwtUtil 주입
+    private final JwtUtil jwtUtil;
 
     // [8번 API] 내 코스 삭제
     @DeleteMapping("/{courseId}")
     public ApiResponse<MemberResDTO.MyCourseDeleteResultDTO> deleteMyCourse(
-            @RequestHeader("Authorization") String token, // 토큰으로 변경
+            @RequestHeader("Authorization") String token,
             @PathVariable Long courseId
     ) {
         String email = jwtUtil.getUserInfoFromToken(token.substring(7));
@@ -44,7 +44,7 @@ public class MemberCommandController implements MemberCommandControllerDocs {
     // [10 API] 내 코스 수정
     @PatchMapping("/{courseId}")
     public ApiResponse<MemberResDTO.MyCourseDetailDTO> editMyCourseDetail(
-            @RequestHeader("Authorization") String token, // 토큰으로 변경
+            @RequestHeader("Authorization") String token,
             @PathVariable Long courseId,
             @RequestBody MemberReqDTO.MyCourseDetailEditDTO request
     ) {

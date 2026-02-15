@@ -21,7 +21,7 @@ public interface MemberQueryControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "MEMBER_COURSE400_3", description = "Invalid travel days.")
     })
     ApiResponse<MemberResDTO.FilterOptionsDTO> getMyCourseFilterOptions(
-            String token, // Long memberId -> String token 변경
+            String token,
             Long regionId,
             Integer travelDays,
             TravelStatus travelStatus
