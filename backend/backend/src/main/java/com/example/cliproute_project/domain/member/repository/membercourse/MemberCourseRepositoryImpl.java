@@ -289,7 +289,6 @@ public class MemberCourseRepositoryImpl implements MemberCourseRepositoryCustom 
         QVideo v = QVideo.video;
         QCoursePlace cp = QCoursePlace.coursePlace;
         QPlace p = QPlace.place;
-        QVideoPlace vp = QVideoPlace.videoPlace;
 
         return queryFactory
                 .select(Projections.constructor(
@@ -331,16 +330,11 @@ public class MemberCourseRepositoryImpl implements MemberCourseRepositoryCustom 
                         mc.deletedAt.isNull(),
                         mc.isScrapped.isTrue()
                 )
-                .leftJoin(cp).on(cp.course.eq(c))
+                .leftJoin(cp).on(cp.course.eq(c).and(cp.deletedAt.isNull())) // 삭제된 장소 제외
                 .leftJoin(p).on(cp.place.eq(p))
-                .leftJoin(vp).on(
-                        vp.video.eq(c.sourceVideo)
-                                .and(vp.place.eq(p))
-                )
                 .where(
                         c.id.eq(courseId),
-                        c.deletedAt.isNull(),
-                        c.isCustomized.isTrue()
+                        c.deletedAt.isNull()
                 )
                 .orderBy(cp.visitDay.asc(), cp.visitOrder.asc())
                 .fetch();

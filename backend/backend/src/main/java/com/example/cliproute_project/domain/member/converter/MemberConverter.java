@@ -103,7 +103,7 @@ public class MemberConverter {
                 .courseTitle(base.courseTitle())
                 .startDate(base.startDate())
                 .endDate(base.endDate())
-                .itineraries(itineraries)
+                .itineraries(toMyCourseItineraries(flats))
                 .build();
     }
 
