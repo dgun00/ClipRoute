@@ -20,8 +20,8 @@ public record MyCourseDetailFlat(
         LocalDate startDate,
         LocalDate endDate,
         Integer travelDays,
-        Integer likeCount,
-        Long scrapCount,
+//        Integer likeCount,
+//        Long scrapCount,
         Long coursePlaceId,
         Long placeId,
         Integer visitOrder,
@@ -31,7 +31,7 @@ public record MyCourseDetailFlat(
         Double latitude,
         Double longitude,
         Integer visitDay,
-        Integer timestamp,
+//        Integer timestamp,
         LocalDateTime updatedAt
 ) {
 }

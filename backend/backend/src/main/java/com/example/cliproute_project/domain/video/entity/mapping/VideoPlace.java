@@ -30,7 +30,7 @@ public class VideoPlace extends BaseEntity {
     private Place place;
     
     // 타임 스탬프 (sec)
-    @Column(nullable = false)
-    private Integer timestamp;
+//    @Column(nullable = false)
+//    private Integer timestamp;
 
 }
