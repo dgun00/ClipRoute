@@ -15,6 +15,6 @@ public record CoursePlaceDetailFlat(
         String address,
         Double lat,
         Double lng,
-        Integer timestamp,
+//        Integer timestamp,
         LocalDateTime deletedAt
 ) {}

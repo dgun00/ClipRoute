@@ -92,7 +92,7 @@ public class CourseConverter {
                 flat.address(), // address
                 flat.lat(), // lat
                 flat.lng(), // lng
-                flat.timestamp(), // 초 반환
+//                flat.timestamp(), // 초 반환
                 flat.deletedAt()
         );
     }

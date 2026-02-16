@@ -45,7 +45,7 @@ public class CourseDetailQueryRepository {
                         p.address,
                         p.lat,
                         p.lng,
-                        vp.timestamp,
+//                        vp.timestamp,
                         p.deletedAt
                 ))
                 .from(cp)

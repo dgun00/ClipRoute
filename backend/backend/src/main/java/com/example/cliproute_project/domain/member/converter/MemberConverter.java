@@ -156,7 +156,7 @@ public class MemberConverter {
                 .address(flat.address())
                 .lat(flat.latitude())
                 .lng(flat.longitude())
-                .timestamp(flat.timestamp())
+//                .timestamp(flat.timestamp())
                 .deletedAt(null)
                 .build();
     }

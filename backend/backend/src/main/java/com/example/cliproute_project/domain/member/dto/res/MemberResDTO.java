@@ -82,7 +82,7 @@ public class MemberResDTO {
             String address,
             Double lat,
             Double lng,
-            Integer timestamp,
+//            Integer timestamp,
             LocalDateTime deletedAt
     ) {}
 

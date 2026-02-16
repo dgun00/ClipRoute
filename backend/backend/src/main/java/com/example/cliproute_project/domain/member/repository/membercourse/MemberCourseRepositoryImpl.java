@@ -318,7 +318,7 @@ public class MemberCourseRepositoryImpl implements MemberCourseRepositoryCustom 
                         p.lat,                       // 22. latitude (Double)
                         p.lng,                       // 23. longitude (Double)
                         cp.visitDay,                 // 24. visitDay (Integer)
-                        vp.timestamp,                // 25. timestamp (Integer)
+//                        vp.timestamp,                // 25. timestamp (Integer)
                         p.updatedAt                  // 26. updatedAt (LocalDateTime)
                 ))
                 .from(c)
