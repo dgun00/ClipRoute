@@ -307,8 +307,8 @@ public class MemberCourseRepositoryImpl implements MemberCourseRepositoryCustom 
                         mc.startDate,                // 11. startDate (LocalDate)
                         mc.endDate,                  // 12. endDate (LocalDate)
                         c.travelDays,                // 13. travelDays (Integer)
-                        com.querydsl.core.types.dsl.Expressions.asNumber(0).as("likeCount"),  // 14. Integer
-                        com.querydsl.core.types.dsl.Expressions.asNumber(0L).as("scrapCount"), // 15. Long
+//                        com.querydsl.core.types.dsl.Expressions.asNumber(0).as("likeCount"),  // 14. Integer
+//                        com.querydsl.core.types.dsl.Expressions.asNumber(0L).as("scrapCount"), // 15. Long
 
                         cp.id,                       // 16. coursePlaceId (Long)
                         p.id,                        // 17. placeId (Long)
