@@ -36,6 +36,7 @@ public class SecurityConfig {
                     ));
                     corsConfiguration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                     corsConfiguration.setAllowedHeaders(java.util.List.of("*"));
+                    corsConfiguration.setExposedHeaders(java.util.List.of("Authorization"));
                     corsConfiguration.setAllowCredentials(true);
                     return corsConfiguration;
                 }))

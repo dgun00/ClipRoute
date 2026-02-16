@@ -288,35 +288,40 @@ public class MemberCourseRepositoryImpl implements MemberCourseRepositoryCustom 
         QVideo v = QVideo.video;
         QCoursePlace cp = QCoursePlace.coursePlace;
         QPlace p = QPlace.place;
-        QVideoPlace vp = QVideoPlace.videoPlace;
 
         return queryFactory
                 .select(Projections.constructor(
                         MyCourseDetailFlat.class,
-                        c.id,                        // 1. courseId (Long)
-                        c.title,                     // 2. courseTitle (String)
-                        r.regionName,                // 3. regionName (String)
-                        r.imageUrl,                  // 4. regionRepImageUrl (String)
-                        v.thumbnailUrl,              // 5. thumbnailUrl (String)
-                        mc.id,                       // 6. memberCourseId (Long)
-                        mc.member.nickname,          // 7. nickname (String)
-                        mc.member.id.eq(memberId),   // 8. isMine (Boolean)
-                        mc.travelStatus,             // 9. travelStatus (Enum)
-                        c.description,               // 10. memo (String)
-                        mc.startDate,                // 11. startDate (LocalDate)
-                        mc.endDate,                  // 12. endDate (LocalDate)
-                        c.travelDays,                // 13. travelDays (Integer)
-                        com.querydsl.core.types.dsl.Expressions.asNumber(0).as("likeCount"),  // 14. Integer
-                        com.querydsl.core.types.dsl.Expressions.asNumber(0L).as("scrapCount"), // 15. Long
-
-                        cp.id,                       // 16. coursePlaceId (Long)
-                        p.placeName,                 // 17. placeName (String)
-                        p.placeCategory,             // 18. placeCategory (Enum)
-                        p.address,                   // 19. address (String)
-                        p.lat,                       // 20. latitude (Double)
-                        p.lng,                       // 21. longitude (Double)
-                        cp.visitDay,                 // 22. visitDay (Integer)
-                        p.updatedAt                  // 23. updatedAt (LocalDateTime)
+                        c.id,                        // 1. courseId
+                        v.title,                     // 2. videoTitle (추가)
+                        v.ytVideoId,                 // 3. ytVideoId (추가)
+                        v.channelName,               // 4. channelName (추가)
+                        r.id,                        // 5. regionId (추가)
+                        r.regionName,                // 6. regionName
+                        r.imageUrl,                  // 7. regionRepImageUrl
+                        v.thumbnailUrl,              // 8. thumbnailUrl
+                        mc.id,                       // 9. memberCourseId
+                        mc.member.nickname,          // 10. nickname
+                        mc.member.id.eq(memberId),   // 11. isMine
+                        mc.isScrapped,               // 12. isScrapped (추가)
+                        mc.travelStatus,             // 13. travelStatus
+                        c.title,                     // 14. courseTitle
+                        c.description,               // 15. memo
+                        mc.startDate,                // 16. startDate
+                        mc.endDate,                  // 17. endDate
+                        c.travelDays,                // 18. travelDays
+                        com.querydsl.core.types.dsl.Expressions.asNumber(0).as("likeCount"),  // 19
+                        com.querydsl.core.types.dsl.Expressions.asNumber(0L).as("scrapCount"), // 20
+                        cp.id,                       // 21. coursePlaceId
+                        p.id,                        // 22. placeId (추가)
+                        p.placeName,                 // 23. placeName
+                        p.placeCategory,             // 24. placeCategory
+                        p.address,                   // 25. address
+                        p.lat,                       // 26. latitude
+                        p.lng,                       // 27. longitude
+                        cp.visitDay,                 // 28. visitDay
+                        cp.visitOrder,               // 29. visitOrder (추가)
+                        p.updatedAt                  // 30. updatedAt
                 ))
                 .from(c)
                 .join(c.region, r)
@@ -327,16 +332,11 @@ public class MemberCourseRepositoryImpl implements MemberCourseRepositoryCustom 
                         mc.deletedAt.isNull(),
                         mc.isScrapped.isTrue()
                 )
-                .leftJoin(cp).on(cp.course.eq(c))
+                .leftJoin(cp).on(cp.course.eq(c).and(cp.deletedAt.isNull())) // 삭제된 장소 제외
                 .leftJoin(p).on(cp.place.eq(p))
-                .leftJoin(vp).on(
-                        vp.video.eq(c.sourceVideo)
-                                .and(vp.place.eq(p))
-                )
                 .where(
                         c.id.eq(courseId),
-                        c.deletedAt.isNull(),
-                        c.isCustomized.isTrue()
+                        c.deletedAt.isNull()
                 )
                 .orderBy(cp.visitDay.asc(), cp.visitOrder.asc())
                 .fetch();

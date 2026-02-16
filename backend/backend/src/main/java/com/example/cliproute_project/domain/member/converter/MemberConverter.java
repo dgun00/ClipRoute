@@ -55,18 +55,18 @@ public class MemberConverter {
 
         return MemberResDTO.MyCourseDetailDTO.builder()
                 .courseId(base.courseId())
-                .videoTitle(base.courseTitle()) // videoTitle 대신 courseTitle 사용
-                .videoUrl(null) // 현재 Flat에 ytVideoId가 없으므로 임시 null
+                .videoTitle(base.videoTitle())
+                .videoUrl(buildYoutubeUrl(base.ytVideoId()))
                 .thumbnailUrl(base.thumbnailUrl())
-                .channelName(base.nickname()) // channelName 대신 닉네임 사용
-                .regionId(null) // 현재 Flat에 regionId가 없으므로 임시 null
+                .channelName(base.channelName())
+                .regionId(base.regionId())
                 .regionName(base.regionName())
-                .isScrapped(false) // 임시 처리
+                .isScrapped(base.isScrapped())
                 .travelStatus(base.travelStatus())
                 .courseTitle(base.courseTitle())
                 .startDate(base.startDate())
                 .endDate(base.endDate())
-                .itineraries(itineraries)
+                .itineraries(toMyCourseItineraries(flats))
                 .build();
     }
 
