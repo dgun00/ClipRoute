@@ -18,31 +18,68 @@ public class MemberConverter {
 
     private static final String YOUTUBE_WATCH_URL_PREFIX = "https://www.youtube.com/watch?v=";
 
-    // [6 API] 생략 (동일)
-    public static MemberResDTO.FilterOptionsDTO toFilterOptionsDTO(List<MyCourseRegionOptionFlat> regions, List<Integer> travelDays, List<TravelStatus> travelStatuses) {
-        List<MemberResDTO.RegionOptionDTO> regionOptions = (regions == null || regions.isEmpty()) ? List.of() : regions.stream().map(MemberConverter::toRegionOptionDTO).toList();
+    public static MemberResDTO.FilterOptionsDTO toFilterOptionsDTO(
+            List<MyCourseRegionOptionFlat> regions,
+            List<Integer> travelDays,
+            List<TravelStatus> travelStatuses
+    ) {
+        List<MemberResDTO.RegionOptionDTO> regionOptions =
+                (regions == null || regions.isEmpty()) ? List.of() : regions.stream().map(MemberConverter::toRegionOptionDTO).toList();
         List<Integer> travelDaysOptions = (travelDays == null || travelDays.isEmpty()) ? List.of() : List.copyOf(travelDays);
-        List<TravelStatus> travelStatusOptions = (travelStatuses == null || travelStatuses.isEmpty()) ? List.of() : List.copyOf(travelStatuses);
-        return MemberResDTO.FilterOptionsDTO.builder().regions(regionOptions).travelDays(travelDaysOptions).travelStatuses(travelStatusOptions).build();
+        List<TravelStatus> travelStatusOptions =
+                (travelStatuses == null || travelStatuses.isEmpty()) ? List.of() : List.copyOf(travelStatuses);
+
+        return MemberResDTO.FilterOptionsDTO.builder()
+                .regions(regionOptions)
+                .travelDays(travelDaysOptions)
+                .travelStatuses(travelStatusOptions)
+                .build();
     }
 
-    // [7 API] 생략 (동일)
-    public static MemberResDTO.MyCourseListDTO toMyCourseListDTO(List<MyCourseListFlat> flats, SliceInfoDTO sliceInfoDTO, String sort) {
-        List<MemberResDTO.MyCourseDTO> courses = (flats == null || flats.isEmpty()) ? List.of() : flats.stream().map(MemberConverter::toMyCourseDTO).toList();
-        return MemberResDTO.MyCourseListDTO.builder().courseList(courses).sliceInfo(sliceInfoDTO).sort(sort).build();
+    public static MemberResDTO.MyCourseListDTO toMyCourseListDTO(
+            List<MyCourseListFlat> flats,
+            SliceInfoDTO sliceInfoDTO,
+            String sort
+    ) {
+        List<MemberResDTO.MyCourseDTO> courses =
+                (flats == null || flats.isEmpty()) ? List.of() : flats.stream().map(MemberConverter::toMyCourseDTO).toList();
+
+        return MemberResDTO.MyCourseListDTO.builder()
+                .courseList(courses)
+                .sliceInfo(sliceInfoDTO)
+                .sort(sort)
+                .build();
     }
 
     private static MemberResDTO.MyCourseDTO toMyCourseDTO(MyCourseListFlat flat) {
-        String thumbnailUrl = (flat.courseImageUrl() != null && !flat.courseImageUrl().isBlank()) ? flat.courseImageUrl() : flat.videoThumbnailUrl();
+        String thumbnailUrl =
+                (flat.courseImageUrl() != null && !flat.courseImageUrl().isBlank()) ? flat.courseImageUrl() : flat.videoThumbnailUrl();
         Integer placeCount = flat.placeCount() != null ? flat.placeCount().intValue() : 0;
-        return MemberResDTO.MyCourseDTO.builder().courseId(flat.courseId()).memberCourseId(flat.memberCourseId()).courseTitle(flat.courseTitle()).regionName(flat.regionName()).regionRepImageUrl(flat.regionRepImageUrl()).thumbnailUrl(thumbnailUrl).startDate(flat.startDate()).endDate(flat.endDate()).travelDays(flat.travelDays()).travelStatus(flat.travelStatus()).placeCount(placeCount).createdAt(flat.createdAt()).updatedAt(flat.updatedAt()).build();
+
+        return MemberResDTO.MyCourseDTO.builder()
+                .courseId(flat.courseId())
+                .memberCourseId(flat.memberCourseId())
+                .courseTitle(flat.courseTitle())
+                .regionName(flat.regionName())
+                .regionRepImageUrl(flat.regionRepImageUrl())
+                .thumbnailUrl(thumbnailUrl)
+                .startDate(flat.startDate())
+                .endDate(flat.endDate())
+                .travelDays(flat.travelDays())
+                .travelStatus(flat.travelStatus())
+                .placeCount(placeCount)
+                .createdAt(flat.createdAt())
+                .updatedAt(flat.updatedAt())
+                .build();
     }
 
     private static MemberResDTO.RegionOptionDTO toRegionOptionDTO(MyCourseRegionOptionFlat flat) {
-        return MemberResDTO.RegionOptionDTO.builder().id(flat.id()).name(flat.name()).build();
+        return MemberResDTO.RegionOptionDTO.builder()
+                .id(flat.id())
+                .name(flat.name())
+                .build();
     }
 
-    // [9 API] 수정한 부분 (필드명 매핑)
     public static MemberResDTO.MyCourseDetailDTO toMyCourseDetailDTO(List<MyCourseDetailFlat> flats) {
         if (flats == null || flats.isEmpty()) {
             return MemberResDTO.MyCourseDetailDTO.builder()
@@ -55,13 +92,13 @@ public class MemberConverter {
 
         return MemberResDTO.MyCourseDetailDTO.builder()
                 .courseId(base.courseId())
-                .videoTitle(base.courseTitle()) // videoTitle 대신 courseTitle 사용
-                .videoUrl(null) // 현재 Flat에 ytVideoId가 없으므로 임시 null
+                .videoTitle(base.courseTitle())
+                .videoUrl(null)
                 .thumbnailUrl(base.thumbnailUrl())
-                .channelName(base.nickname()) // channelName 대신 닉네임 사용
-                .regionId(null) // 현재 Flat에 regionId가 없으므로 임시 null
+                .channelName(base.nickname())
+                .regionId(null)
                 .regionName(base.regionName())
-                .isScrapped(false) // 임시 처리
+                .isScrapped(false)
                 .travelStatus(base.travelStatus())
                 .courseTitle(base.courseTitle())
                 .startDate(base.startDate())
@@ -75,7 +112,7 @@ public class MemberConverter {
                 .filter(flat -> flat.visitDay() != null)
                 .sorted(Comparator
                         .comparing(MyCourseDetailFlat::visitDay, Comparator.nullsLast(Integer::compareTo))
-                        .thenComparing(MyCourseDetailFlat::coursePlaceId, Comparator.nullsLast(Long::compareTo)) // visitOrder 대신 ID 순서
+                        .thenComparing(MyCourseDetailFlat::coursePlaceId, Comparator.nullsLast(Long::compareTo))
                 )
                 .toList();
 
@@ -111,25 +148,33 @@ public class MemberConverter {
 
     private static MemberResDTO.MyCoursePlaceDTO toMyCoursePlaceDTO(MyCourseDetailFlat flat) {
         return MemberResDTO.MyCoursePlaceDTO.builder()
-                .visitOrder(0) // visitOrder 필드가 Flat에 없으므로 임시 0
+                .visitOrder(flat.visitOrder())
                 .coursePlaceId(flat.coursePlaceId())
-                .placeId(0L) // placeId 필드가 Flat에 없으므로 임시 0L
+                .placeId(flat.placeId())
                 .placeName(flat.placeName())
-                .placeCategory(flat.placeCategory().toString()) // Enum을 String으로 변환
+                .placeCategory(flat.placeCategory().toString())
                 .address(flat.address())
-                .lat(flat.latitude()) // lat -> latitude
-                .lng(flat.longitude()) // lng -> longitude
-                .timestamp(0) // timestamp 필드 없음
-                .deletedAt(null) // deletedAt 필드 없음
+                .lat(flat.latitude())
+                .lng(flat.longitude())
+                .timestamp(flat.timestamp())
+                .deletedAt(null)
                 .build();
     }
 
-    public static MemberResDTO.MyCourseDeleteResultDTO toMyCourseDeleteResultDTO(Long courseId, java.time.LocalDateTime deletedAt) {
-        return MemberResDTO.MyCourseDeleteResultDTO.builder().courseId(courseId).deletedAt(deletedAt).build();
+    public static MemberResDTO.MyCourseDeleteResultDTO toMyCourseDeleteResultDTO(
+            Long courseId,
+            java.time.LocalDateTime deletedAt
+    ) {
+        return MemberResDTO.MyCourseDeleteResultDTO.builder()
+                .courseId(courseId)
+                .deletedAt(deletedAt)
+                .build();
     }
 
     private static String buildYoutubeUrl(String ytVideoId) {
-        if (ytVideoId == null || ytVideoId.isBlank()) { return null; }
+        if (ytVideoId == null || ytVideoId.isBlank()) {
+            return null;
+        }
         return YOUTUBE_WATCH_URL_PREFIX + ytVideoId;
     }
 }
