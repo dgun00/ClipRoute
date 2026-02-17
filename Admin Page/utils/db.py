@@ -117,10 +117,23 @@ def fetch_table_rows(table_name, limit=200, offset=0, order_by="id"):
 def insert_rows(table_name, columns, rows):
     if not rows:
         return 0
+    try:
+        import pandas as pd
+    except Exception:
+        pd = None
+    import math
+
+    def _clean_value(value):
+        if pd is not None and pd.isna(value):
+            return None
+        if isinstance(value, float) and math.isnan(value):
+            return None
+        return value
+
     col_sql = ", ".join([f"`{c}`" for c in columns])
     placeholders = ", ".join(["%s"] * len(columns))
     sql = f"INSERT INTO `{table_name}` ({col_sql}) VALUES ({placeholders})"
-    params_list = [[row.get(col) for col in columns] for row in rows]
+    params_list = [[_clean_value(row.get(col)) for col in columns] for row in rows]
     return executemany(sql, params_list)
 
 
