@@ -9,19 +9,20 @@ import java.time.LocalDateTime;
 public record MyCourseDetailFlat(
         Long courseId,
         String courseTitle,
+        Long regionId,             // 추가
         String regionName,
         String regionRepImageUrl,
+        String videoUrl,           // 추가
         String thumbnailUrl,
         Long memberCourseId,
         String nickname,
         Boolean isMine,
+        Boolean isScrapped,        // 추가
         TravelStatus travelStatus,
         String memo,
         LocalDate startDate,
         LocalDate endDate,
         Integer travelDays,
-//        Integer likeCount,
-//        Long scrapCount,
         Long coursePlaceId,
         Long placeId,
         Integer visitOrder,
@@ -31,7 +32,7 @@ public record MyCourseDetailFlat(
         Double latitude,
         Double longitude,
         Integer visitDay,
-//        Integer timestamp,
+        Integer timestamp,         // 추가
         LocalDateTime updatedAt
 ) {
 }
