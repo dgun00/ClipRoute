@@ -30,7 +30,7 @@ public record MyCourseDetailFlat(
         Double latitude,
         Double longitude,
         Integer visitDay,
-        Integer timestamp,         // 추가
+        //Integer timestamp,         // 추가
         LocalDateTime updatedAt
 ) {
 }

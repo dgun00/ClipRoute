@@ -16,7 +16,7 @@ public class JwtUtil {
     private String secretKey;
 
     private Key key;
-    private final long TOKEN_TIME = 60 * 60 * 1000L; // 1시간
+    private final long TOKEN_TIME = 2 * 24 * 60 * 60 * 1000L; // 48시간
 
     @PostConstruct
     public void init() {
