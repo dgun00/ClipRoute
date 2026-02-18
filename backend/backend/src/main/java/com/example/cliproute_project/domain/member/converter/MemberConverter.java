@@ -85,7 +85,7 @@ public class MemberConverter {
         }
 
         MyCourseDetailFlat base = flats.get(0);
-        List<MemberResDTO.MyCourseItineraryDTO> itineraries = toMyCourseItineraries(flats);
+//        List<MemberResDTO.MyCourseItineraryDTO> itineraries = toMyCourseItineraries(flats);
 
         return MemberResDTO.MyCourseDetailDTO.builder()
                 .courseId(base.courseId())
@@ -144,15 +144,15 @@ public class MemberConverter {
 
     private static MemberResDTO.MyCoursePlaceDTO toMyCoursePlaceDTO(MyCourseDetailFlat flat) {
         return MemberResDTO.MyCoursePlaceDTO.builder()
-                .visitOrder(flat.visitOrder())
+                .visitOrder(flat.visitOrder())   // 0 대신 flat 값
                 .coursePlaceId(flat.coursePlaceId())
-                .placeId(flat.placeId())
+                .placeId(flat.placeId())         // 0 대신 flat 값
                 .placeName(flat.placeName())
                 .placeCategory(flat.placeCategory().toString())
                 .address(flat.address())
                 .lat(flat.latitude())
                 .lng(flat.longitude())
-//                .timestamp(flat.timestamp())
+                .timestamp(flat.timestamp())     // flat 값 연결
                 .deletedAt(null)
                 .build();
     }
