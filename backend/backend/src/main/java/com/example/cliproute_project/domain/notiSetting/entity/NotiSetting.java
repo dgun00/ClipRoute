@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "NOTI_SETTINGS")
+@Table(name = "noti_settings")
 public class NotiSetting extends BaseEntity {
 
     @Id

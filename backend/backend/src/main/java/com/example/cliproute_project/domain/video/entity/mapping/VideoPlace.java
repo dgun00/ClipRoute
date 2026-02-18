@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "VIDEOS_PLACE")
+@Table(name = "videos_place")
 public class VideoPlace extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,9 +28,9 @@ public class VideoPlace extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "place_id", nullable = false)
     private Place place;
-    
-    // 타임 스탬프 (sec)
-//    @Column(nullable = false)
-//    private Integer timestamp;
+
+    // 타임스탬프(sec)
+    @Column(name = "timestamp", nullable = false)
+    private Integer timestamp;
 
 }

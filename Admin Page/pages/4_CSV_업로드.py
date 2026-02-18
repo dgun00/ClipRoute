@@ -3,15 +3,11 @@ import pandas as pd
 import streamlit as st
 
 from utils.auth import show_login_page
-from utils.admin_ui import render_csv_upload
-from utils.entities import get_entity_configs
-from utils.db import is_db_configured, fetch_fk_options, fetch_all
+from utils.db import is_db_configured, fetch_all
 from utils.csv_import import (
     import_preprocessed_csv,
     PREPROCESSED_COLUMNS,
     normalize_preprocessed_df,
-    import_cliproute_csv,
-    CLIPROUTE_COLUMNS,
 )
 
 
@@ -28,8 +24,6 @@ st.markdown("---")
 if not is_db_configured():
     st.error("DB 설정이 없습니다. `.env`에 DB 정보를 입력하세요.")
     st.stop()
-
-configs = get_entity_configs()
 
 mode = st.radio(
     "업로드 방식",
@@ -52,16 +46,15 @@ if mode == "전처리 CSV(코스/장소 일괄)":
     st.subheader("전처리 CSV 업로드")
     st.caption("형식: " + ", ".join(PREPROCESSED_COLUMNS))
 
-    role_filter = st.selectbox("멤버 역할", options=["ADMIN", "USER"], index=0)
     member_options = fetch_all(
         "SELECT id, email AS label FROM members WHERE role = %s ORDER BY id DESC LIMIT 5000",
-        [role_filter],
+        ["ADMIN"],
     )
     if not member_options:
         st.error("members 테이블에 해당 역할 멤버가 없습니다.")
         st.stop()
     author_id = st.selectbox(
-        "작성자(멤버) 선택",
+        "작성자(ADMIN) 선택",
         options=[m["id"] for m in member_options],
         format_func=lambda x: f"{x} | {member_options[[m['id'] for m in member_options].index(x)]['label']}",
     )
@@ -96,21 +89,81 @@ if mode == "전처리 CSV(코스/장소 일괄)":
         st.subheader("미리보기")
         st.dataframe(df.head(20), use_container_width=True)
 
-        if st.button("전처리 CSV 업로드"):
+        is_running = st.session_state.get("csv_upload_running", False)
+
+        if is_running:
+            st.info("업로드 중... 잠시만 기다려주세요.")
+            st.button("업로드 중...", disabled=True)
+        else:
+            if st.button("전처리 CSV 업로드"):
+                st.session_state["csv_upload_done"] = False
+                st.session_state["csv_upload_message"] = ""
+                st.session_state["csv_upload_status"] = ""
+                st.session_state["csv_upload_show_dialog"] = False
+                st.session_state["csv_upload_running"] = True
+                st.session_state["csv_upload_payload"] = {
+                    "df": df,
+                    "region_id": region_id,
+                    "author_id": author_id,
+                    "lat_col": lat_col,
+                    "lng_col": lng_col,
+                }
+                st.rerun()
+
+        if is_running and st.session_state.get("csv_upload_payload"):
+            payload = st.session_state.get("csv_upload_payload", {})
             try:
                 result = import_preprocessed_csv(
-                    df=df,
-                    region_id=region_id,
-                    author_id=author_id,
+                    df=payload["df"],
+                    region_id=payload["region_id"],
+                    author_id=payload["author_id"],
                     source_video_mode="yt",
                     default_source_video_id=None,
-                    lat_col=lat_col,
-                    lng_col=lng_col,
+                    lat_col=payload["lat_col"],
+                    lng_col=payload["lng_col"],
                     default_lat=None,
                     default_lng=None,
                 )
-                st.success(
-                    f"완료: courses {result['courses']}건 places {result['places']}건 course_place {result['course_place']}건 skip {result['skipped']}건"
+                message = (
+                    f"완료: videos {result['videos']}건 images {result['images']}건 courses {result['courses']}건 "
+                    f"places {result['places']}건 course_place {result['course_place']}건 "
+                    f"이미지업로드 {result.get('image_uploads', 0)}건"
                 )
+                st.success(message)
+                st.session_state["csv_upload_done"] = True
+                st.session_state["csv_upload_message"] = message
+                st.session_state["csv_upload_status"] = "success"
+                st.session_state["csv_upload_show_dialog"] = True
             except Exception as exc:
-                st.error(f"업로드 실패: {exc}")
+                message = f"업로드 실패: {exc}"
+                st.error(message)
+                st.session_state["csv_upload_done"] = True
+                st.session_state["csv_upload_message"] = message
+                st.session_state["csv_upload_status"] = "error"
+                st.session_state["csv_upload_show_dialog"] = True
+            finally:
+                st.session_state["csv_upload_running"] = False
+                st.session_state["csv_upload_payload"] = None
+                st.rerun()
+
+    if st.session_state.get("csv_upload_done"):
+        status = st.session_state.get("csv_upload_status", "success")
+        msg = st.session_state.get("csv_upload_message", "")
+        if status == "error":
+            st.error(msg or "CSV 업로드가 실패했습니다.")
+        else:
+            st.success(msg or "CSV 업로드가 완료되었습니다.")
+
+    if st.session_state.get("csv_upload_show_dialog") and hasattr(st, "dialog"):
+        @st.dialog("업로드 완료")
+        def _done_dialog():
+            status = st.session_state.get("csv_upload_status", "success")
+            if status == "error":
+                st.error("CSV 업로드가 실패했습니다.")
+            else:
+                st.warning("CSV 업로드가 완료되었습니다.")
+            st.write(st.session_state.get("csv_upload_message", ""))
+            if st.button("닫기", type="primary"):
+                st.session_state["csv_upload_show_dialog"] = False
+
+        _done_dialog()

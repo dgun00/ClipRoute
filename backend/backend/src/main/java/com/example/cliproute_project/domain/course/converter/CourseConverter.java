@@ -17,7 +17,7 @@ public class CourseConverter {
     public static CourseResDTO.CoursePublicDTO toCoursePublicDTO(Course course, boolean isRecommended) {
         return CourseResDTO.CoursePublicDTO.builder()
                 .courseId(course.getId())
-                .thumbnailUrl(course.getSourceVideo().getThumbnailUrl())
+                .ytVideoId(course.getSourceVideo().getYtVideoId())
                 .channelName(course.getSourceVideo().getChannelName())
                 .videoTitle(course.getSourceVideo().getTitle())
                 .travelDays(course.getTravelDays())

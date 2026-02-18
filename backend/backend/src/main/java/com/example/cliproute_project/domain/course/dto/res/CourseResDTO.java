@@ -2,6 +2,7 @@ package com.example.cliproute_project.domain.course.dto.res;
 
 import com.example.cliproute_project.domain.member.enums.TravelStatus;
 import com.example.cliproute_project.global.common.dto.SliceInfoDTO;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
 import java.time.LocalDate;
@@ -23,7 +24,7 @@ public class CourseResDTO {
     @Builder
     public record CoursePublicDTO( // 비로그인 or 저장 x 코스 데이터 (2번 API)
             Long courseId,
-            String thumbnailUrl,
+            @JsonProperty("yt_video_id") String ytVideoId,
             String channelName,
             String videoTitle,
             Integer travelDays,

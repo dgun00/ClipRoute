@@ -10,7 +10,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "REGIONS")
+@Table(name = "regions")
 public class Region extends BaseEntity {
 
     // 디폴트 이미지 링크

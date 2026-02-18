@@ -1,5 +1,6 @@
 import streamlit as st
 from utils.auth import check_login, show_login_page
+from utils.db import fetch_one, is_db_configured
 from dotenv import load_dotenv
 
 # 환경 변수 로드
@@ -37,18 +38,42 @@ else:
     
     # 통계 카드
     col1, col2, col3, col4 = st.columns(4)
-    
+
+    def _safe_count(sql: str, params=None) -> int:
+        try:
+            row = fetch_one(sql, params or [])
+            if not row:
+                return 0
+            return int(list(row.values())[0])
+        except Exception:
+            return 0
+
+    if is_db_configured():
+        total_courses = _safe_count("SELECT COUNT(*) AS cnt FROM courses")
+        today_courses = _safe_count(
+            "SELECT COUNT(*) AS cnt FROM courses WHERE DATE(created_at) = CURDATE()"
+        )
+        active_members = _safe_count(
+            "SELECT COUNT(*) AS cnt FROM members WHERE status = %s",
+            ["ACTIVE"],
+        )
+        pending_courses = _safe_count(
+            "SELECT COUNT(*) AS cnt FROM courses WHERE deleted_at IS NULL AND is_rep = 0"
+        )
+    else:
+        total_courses = today_courses = active_members = pending_courses = 0
+
     with col1:
-        st.metric(label="총 데이터", value="150", delta="12")
+        st.metric(label="총 코스", value=str(total_courses))
     
     with col2:
-        st.metric(label="오늘 추가", value="5", delta="2")
+        st.metric(label="오늘 추가 코스", value=str(today_courses))
     
     with col3:
-        st.metric(label="활성 사용자", value="42", delta="-3")
+        st.metric(label="활성 멤버", value=str(active_members))
     
     with col4:
-        st.metric(label="처리 대기", value="8", delta="1")
+        st.metric(label="대표 아님(대기)", value=str(pending_courses))
     
     st.markdown("---")
     
@@ -74,12 +99,7 @@ else:
     
     # 최근 활동
     st.markdown("---")
-    st.subheader("📌 최근 활동")
+    st.subheader("📌 최근 활동 (미구현)")
     
     with st.container():
-        st.markdown("""
-        - 🟢 2024-02-11 15:30 - 새로운 데이터 추가됨 (ID: 151)
-        - 🟡 2024-02-11 14:15 - 데이터 수정됨 (ID: 98)
-        - 🔴 2024-02-11 13:05 - 데이터 삭제됨 (ID: 45)
-        - 🟢 2024-02-11 12:00 - 새로운 데이터 추가됨 (ID: 150)
-        """)
+        st.info("최근 활동 로그는 아직 구현되지 않았습니다.")
