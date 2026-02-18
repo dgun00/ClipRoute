@@ -152,7 +152,7 @@ public class MemberConverter {
                 .address(flat.address())
                 .lat(flat.latitude())
                 .lng(flat.longitude())
-                .timestamp(flat.timestamp())     // flat 값 연결
+//                .timestamp(flat.timestamp())     // flat 값 연결
                 .deletedAt(null)
                 .build();
     }
