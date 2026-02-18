@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "TERMS")
+@Table(name = "terms")
 public class Term extends BaseEntity {
 
     @Id

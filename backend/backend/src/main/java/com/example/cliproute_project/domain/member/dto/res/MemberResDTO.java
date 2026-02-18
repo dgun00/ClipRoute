@@ -2,6 +2,7 @@ package com.example.cliproute_project.domain.member.dto.res;
 
 import com.example.cliproute_project.domain.member.enums.TravelStatus;
 import com.example.cliproute_project.global.common.dto.SliceInfoDTO;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
 import java.time.LocalDate;
@@ -37,8 +38,7 @@ public class MemberResDTO {
             Long memberCourseId,
             String courseTitle,
             String regionName,
-            String regionRepImageUrl,
-            String thumbnailUrl,
+            @JsonProperty("yt_video_id") String ytVideoId,
             LocalDate startDate,
             LocalDate endDate,
             Integer travelDays,
@@ -53,8 +53,7 @@ public class MemberResDTO {
     public record MyCourseDetailDTO(
             Long courseId,
             String videoTitle,
-            String videoUrl,
-            String thumbnailUrl,
+            @JsonProperty("yt_video_id") String ytVideoId,
             String channelName,
             Long regionId,
             String regionName,

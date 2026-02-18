@@ -1,13 +1,19 @@
+import os
 import re
 from datetime import datetime
 from typing import Dict, Optional, Tuple
 
 import pandas as pd
+import requests
+import boto3
+from botocore.exceptions import ClientError
 
 from utils.db import fetch_one, insert_rows
 
 
 PREPROCESSED_COLUMNS = [
+    "video_title",
+    "channel_name",
     "course_title",
     "travel_day",
     "visit_day",
@@ -16,7 +22,73 @@ PREPROCESSED_COLUMNS = [
     "address",
     "place_category",
     "yt_video_id",
+    "original_name",
 ]
+
+
+S3_BUCKET = os.getenv("S3_BUCKET") or os.getenv("AWS_S3_BUCKET")
+S3_REGION = os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION") or "ap-northeast-2"
+
+
+def _get_s3_client():
+    access_key = os.getenv("AWS_ACCESS_KEY_ID")
+    secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+    if not (access_key and secret_key and S3_BUCKET):
+        raise RuntimeError("S3 설정이 필요합니다. (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET)")
+    return boto3.client(
+        "s3",
+        region_name=S3_REGION,
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+    )
+
+
+def _s3_url_for_key(key: str) -> str:
+    return f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{key}"
+
+
+def _s3_object_exists(s3, key: str) -> bool:
+    try:
+        s3.head_object(Bucket=S3_BUCKET, Key=key)
+        return True
+    except ClientError as exc:
+        code = exc.response.get("Error", {}).get("Code")
+        if code in ("404", "NoSuchKey", "NotFound"):
+            return False
+        raise
+
+
+def _upload_youtube_thumbnail_to_s3(yt_id: str) -> Tuple[str, bool]:
+    if not yt_id:
+        raise ValueError("이미지 업로드 실패: yt_video_id 없음")
+    key = f"images/courses/{yt_id}.jpg"
+
+    s3 = _get_s3_client()
+    if _s3_object_exists(s3, key):
+        return _s3_url_for_key(key), False
+
+    candidates = [
+        "maxresdefault.jpg",
+        "sddefault.jpg",
+        "hqdefault.jpg",
+    ]
+    resp = None
+    for name in candidates:
+        url = f"https://img.youtube.com/vi/{yt_id}/{name}"
+        resp = requests.get(url, stream=True, timeout=15)
+        if resp.status_code == 200:
+            break
+    if resp is None or resp.status_code != 200:
+        status = resp.status_code if resp is not None else "no-response"
+        raise ValueError(f"이미지 업로드 실패: {yt_id} (HTTP {status})")
+
+    s3.upload_fileobj(
+        resp.raw,
+        S3_BUCKET,
+        key,
+        ExtraArgs={"ContentType": "image/jpeg"},
+    )
+    return _s3_url_for_key(key), True
 
 
 def normalize_preprocessed_df(df: pd.DataFrame) -> pd.DataFrame:
@@ -85,10 +157,18 @@ def _get_existing_place_id(region_id: int, name: str, address: Optional[str]) ->
     return row["id"] if row else None
 
 
-def _get_existing_course_id(region_id: int, author_id: int, title: str) -> Optional[int]:
+def _get_existing_course_id(title: str) -> Optional[int]:
     row = fetch_one(
-        "SELECT id FROM courses WHERE region_id = %s AND author_id = %s AND title = %s LIMIT 1",
-        [region_id, author_id, title],
+        "SELECT id FROM courses WHERE title = %s LIMIT 1",
+        [title],
+    )
+    return row["id"] if row else None
+
+
+def _get_existing_course_id_by_source_video(source_video_id: int, region_id: int) -> Optional[int]:
+    row = fetch_one(
+        "SELECT id FROM courses WHERE source_video_id = %s AND region_id = %s LIMIT 1",
+        [source_video_id, region_id],
     )
     return row["id"] if row else None
 
@@ -96,6 +176,23 @@ def _get_existing_course_id(region_id: int, author_id: int, title: str) -> Optio
 def _get_video_id_from_yt(yt_id: str) -> Optional[int]:
     row = fetch_one("SELECT id FROM videos WHERE yt_video_id = %s LIMIT 1", [yt_id])
     return row["id"] if row else None
+
+
+def _exists_course_place(
+    course_id: int,
+    place_id: int,
+    visit_day: Optional[int],
+    visit_order: Optional[int],
+) -> bool:
+    row = fetch_one(
+        "SELECT id FROM course_place "
+        "WHERE course_id = %s AND place_id = %s "
+        "AND (visit_day = %s OR (visit_day IS NULL AND %s IS NULL)) "
+        "AND (visit_order = %s OR (visit_order IS NULL AND %s IS NULL)) "
+        "LIMIT 1",
+        [course_id, place_id, visit_day, visit_day, visit_order, visit_order],
+    )
+    return row is not None
 
 
 def import_preprocessed_csv(
@@ -109,7 +206,15 @@ def import_preprocessed_csv(
     default_lat: Optional[float] = None,
     default_lng: Optional[float] = None,
 ) -> Dict[str, int]:
-    result = {"courses": 0, "places": 0, "course_place": 0, "skipped": 0}
+    result = {
+        "videos": 0,
+        "images": 0,
+        "courses": 0,
+        "places": 0,
+        "course_place": 0,
+        "skipped": 0,
+        "image_uploads": 0,
+    }
 
     df = normalize_preprocessed_df(df.copy())
 
@@ -121,6 +226,72 @@ def import_preprocessed_csv(
     df["course_title"] = df["course_title"].ffill()
     df["yt_video_id"] = df["yt_video_id"].ffill()
     df["travel_day"] = df["travel_day"].ffill()
+
+    # videos
+    video_rows = []
+    seen_yt = set()
+    for _, row in df.iterrows():
+        yt_id = str(row.get("yt_video_id") or "").strip()
+        if not yt_id or yt_id in seen_yt:
+            continue
+        seen_yt.add(yt_id)
+        existing_id = _get_video_id_from_yt(yt_id)
+        if existing_id:
+            continue
+        video_rows.append(
+            {
+                "region_id": region_id,
+                "yt_video_id": yt_id,
+                "title": str(row.get("video_title") or "").strip() or None,
+                "channel_name": str(row.get("channel_name") or "").strip() or None,
+                "thumbnail_url": _s3_url_for_key(f"images/courses/{yt_id}.jpg"),
+                "upload_date": None,
+                "duration": None,
+                "video_format": None,
+                "has_caption": None,
+                "deleted_at": None,
+                "created_at": datetime.now(),
+                "updated_at": datetime.now(),
+            }
+        )
+
+    if video_rows:
+        inserted = insert_rows("videos", list(video_rows[0].keys()), video_rows)
+        result["videos"] += inserted
+
+    # images
+    image_rows = []
+    seen_image_key = set()
+    seen_yt_upload = set()
+    for _, row in df.iterrows():
+        yt_id = str(row.get("yt_video_id") or "").strip()
+        if not yt_id:
+            continue
+        if yt_id in seen_image_key:
+            continue
+        seen_image_key.add(yt_id)
+        if yt_id not in seen_yt_upload:
+            _, uploaded = _upload_youtube_thumbnail_to_s3(yt_id)
+            seen_yt_upload.add(yt_id)
+            if uploaded:
+                result["image_uploads"] += 1
+        image_url = _s3_url_for_key(f"images/courses/{yt_id}.jpg")
+        existing_id = _get_existing_image_id_by_url(image_url)
+        if existing_id:
+            continue
+        image_rows.append(
+            {
+                "image_url": image_url,
+                "original_name": str(row.get("original_name") or "").strip() or None,
+                "deleted_at": None,
+                "created_at": datetime.now(),
+                "updated_at": datetime.now(),
+            }
+        )
+
+    if image_rows:
+        inserted = insert_rows("images", list(image_rows[0].keys()), image_rows)
+        result["images"] += inserted
 
     if lat_col and lat_col in df.columns:
         df[lat_col] = pd.to_numeric(df[lat_col], errors="coerce")
@@ -171,35 +342,21 @@ def import_preprocessed_csv(
                 "updated_at": datetime.now(),
             }
         )
+        # mark as queued to avoid duplicates before insert
+        place_key_to_id[key] = -1
 
     if place_rows:
-        insert_rows("places", list(place_rows[0].keys()), place_rows)
+        inserted = insert_rows("places", list(place_rows[0].keys()), place_rows)
         for r in place_rows:
             existing_id = _get_existing_place_id(region_id, r["place_name"], r["address"])
             if existing_id:
                 place_key_to_id[(r["place_name"], r["address"])] = existing_id
-        result["places"] += len(place_rows)
+        result["places"] += inserted
 
-    course_title_to_id: Dict[str, int] = {}
+    source_video_to_course_id: Dict[int, int] = {}
     course_rows = []
 
     for _, row in df.iterrows():
-        title = str(row.get("course_title") or "").strip()
-        if not title:
-            result["skipped"] += 1
-            continue
-        if title in course_title_to_id:
-            continue
-
-        existing_id = _get_existing_course_id(region_id, author_id, title)
-        if existing_id:
-            course_title_to_id[title] = existing_id
-            continue
-
-        travel_days = _parse_travel_days(str(row.get("travel_day") or ""))
-        if not travel_days:
-            travel_days = 1
-
         if source_video_mode == "default":
             source_video_id = default_source_video_id
         else:
@@ -209,6 +366,22 @@ def import_preprocessed_csv(
         if not source_video_id:
             result["skipped"] += 1
             continue
+        if source_video_id in source_video_to_course_id:
+            continue
+
+        existing_id = _get_existing_course_id_by_source_video(source_video_id, region_id)
+        if existing_id:
+            source_video_to_course_id[source_video_id] = existing_id
+            continue
+
+        travel_days = _parse_travel_days(str(row.get("travel_day") or ""))
+        if not travel_days:
+            travel_days = 1
+        title = str(row.get("course_title") or "").strip()
+        if not title:
+            title = str(row.get("video_title") or "").strip()
+        if not title:
+            title = f"course-{source_video_id}"
 
         course_rows.append(
             {
@@ -226,23 +399,34 @@ def import_preprocessed_csv(
                 "updated_at": datetime.now(),
             }
         )
+        # mark as queued to avoid duplicates before insert
+        source_video_to_course_id[source_video_id] = -1
 
     if course_rows:
-        insert_rows("courses", list(course_rows[0].keys()), course_rows)
+        inserted = insert_rows("courses", list(course_rows[0].keys()), course_rows)
         for r in course_rows:
-            existing_id = _get_existing_course_id(region_id, author_id, r["title"])
+            existing_id = _get_existing_course_id_by_source_video(r["source_video_id"], r["region_id"])
             if existing_id:
-                course_title_to_id[r["title"]] = existing_id
-        result["courses"] += len(course_rows)
+                source_video_to_course_id[r["source_video_id"]] = existing_id
+        result["courses"] += inserted
 
     course_place_rows = []
     for _, row in df.iterrows():
-        title = str(row.get("course_title") or "").strip()
         place_name = str(row.get("place_name") or "").strip()
-        if not title or not place_name:
+        if not place_name:
             result["skipped"] += 1
             continue
-        course_id = course_title_to_id.get(title)
+
+        if source_video_mode == "default":
+            source_video_id = default_source_video_id
+        else:
+            yt_id = _extract_youtube_id(str(row.get("yt_video_id") or ""))
+            source_video_id = _get_video_id_from_yt(yt_id) if yt_id else None
+        if not source_video_id:
+            result["skipped"] += 1
+            continue
+
+        course_id = source_video_to_course_id.get(source_video_id)
         if not course_id:
             result["skipped"] += 1
             continue
@@ -255,12 +439,18 @@ def import_preprocessed_csv(
         visit_day = row.get("visit_day")
         visit_order = row.get("visit_order")
 
+        visit_day_val = int(visit_day) if pd.notna(visit_day) else None
+        visit_order_val = int(visit_order) if pd.notna(visit_order) else None
+        if _exists_course_place(course_id, place_id, visit_day_val, visit_order_val):
+            result["skipped"] += 1
+            continue
+
         course_place_rows.append(
             {
                 "course_id": course_id,
                 "place_id": place_id,
-                "visit_day": int(visit_day) if pd.notna(visit_day) else None,
-                "visit_order": int(visit_order) if pd.notna(visit_order) else None,
+                "visit_day": visit_day_val,
+                "visit_order": visit_order_val,
                 "deleted_at": None,
                 "created_at": datetime.now(),
                 "updated_at": datetime.now(),
@@ -268,8 +458,8 @@ def import_preprocessed_csv(
         )
 
     if course_place_rows:
-        insert_rows("course_place", list(course_place_rows[0].keys()), course_place_rows)
-        result["course_place"] += len(course_place_rows)
+        inserted = insert_rows("course_place", list(course_place_rows[0].keys()), course_place_rows)
+        result["course_place"] += inserted
 
     return result
 
@@ -279,7 +469,6 @@ CLIPROUTE_COLUMNS = [
     "channel_name",
     "yt_video_id",
     "original_name",
-    "stored_name",
     "course_title",
     "travel_day",
     "visit_day",
@@ -302,8 +491,8 @@ def _normalize_category_kr(value: Optional[str]) -> str:
     return "기타"
 
 
-def _get_existing_image_id_by_stored(stored_name: str) -> Optional[int]:
-    row = fetch_one("SELECT id FROM images WHERE stored_name = %s LIMIT 1", [stored_name])
+def _get_existing_image_id_by_url(image_url: str) -> Optional[int]:
+    row = fetch_one("SELECT id FROM images WHERE image_url = %s LIMIT 1", [image_url])
     return row["id"] if row else None
 
 
@@ -318,6 +507,7 @@ def import_cliproute_csv(
         "courses": 0,
         "course_place": 0,
         "skipped": 0,
+        "image_uploads": 0,
     }
 
     for col in CLIPROUTE_COLUMNS:
@@ -353,7 +543,7 @@ def import_cliproute_csv(
                 "yt_video_id": yt_id,
                 "title": str(row.get("video_title") or "").strip() or None,
                 "channel_name": str(row.get("channel_name") or "").strip() or None,
-                "thumbnail_url": f"https://www.youtube.com/watch?v={yt_id}",
+                "thumbnail_url": _s3_url_for_key(f"images/courses/{yt_id}.jpg"),
                 "upload_date": None,
                 "duration": None,
                 "video_format": None,
@@ -366,27 +556,33 @@ def import_cliproute_csv(
 
     if video_rows:
         video_rows = [_clean_nan(r) for r in video_rows]
-        insert_rows("videos", list(video_rows[0].keys()), video_rows)
-        result["videos"] += len(video_rows)
+        inserted = insert_rows("videos", list(video_rows[0].keys()), video_rows)
+        result["videos"] += inserted
 
     # images
     image_rows = []
-    seen_stored = set()
+    seen_image_key = set()
+    seen_yt_upload = set()
     for _, row in df.iterrows():
-        stored_name = str(row.get("stored_name") or "").strip()
-        if not stored_name or stored_name in seen_stored:
+        yt_id = str(row.get("yt_video_id") or "").strip()
+        if not yt_id:
             continue
-        seen_stored.add(stored_name)
-        existing_id = _get_existing_image_id_by_stored(stored_name)
+        if yt_id in seen_image_key:
+            continue
+        seen_image_key.add(yt_id)
+        if yt_id not in seen_yt_upload:
+            _, uploaded = _upload_youtube_thumbnail_to_s3(yt_id)
+            seen_yt_upload.add(yt_id)
+            if uploaded:
+                result["image_uploads"] += 1
+        image_url = _s3_url_for_key(f"images/courses/{yt_id}.jpg")
+        existing_id = _get_existing_image_id_by_url(image_url)
         if existing_id:
             continue
-        yt_id = str(row.get("yt_video_id") or "").strip()
         image_rows.append(
             {
-                "image_url": f"https://img.youtube.com/vi/{yt_id}/maxresdefault.jpg" if yt_id else None,
+                "image_url": image_url,
                 "original_name": str(row.get("original_name") or "").strip() or None,
-                "stored_name": stored_name,
-                "file_size": None,
                 "deleted_at": None,
                 "created_at": datetime.now(),
                 "updated_at": datetime.now(),
@@ -395,12 +591,12 @@ def import_cliproute_csv(
 
     if image_rows:
         image_rows = [_clean_nan(r) for r in image_rows]
-        insert_rows("images", list(image_rows[0].keys()), image_rows)
-        result["images"] += len(image_rows)
+        inserted = insert_rows("images", list(image_rows[0].keys()), image_rows)
+        result["images"] += inserted
 
     # places
     place_rows = []
-    place_key_to_id: Dict[Tuple[str, Optional[str]], int] = {}
+    place_key_to_id: Dict[Tuple[int, str, Optional[str]], int] = {}
     for _, row in df.iterrows():
         place_name = str(row.get("place_name") or "").strip()
         if not place_name:
@@ -413,16 +609,17 @@ def import_cliproute_csv(
         if pd.isna(region_id) or pd.isna(lat) or pd.isna(lng):
             result["skipped"] += 1
             continue
-        key = (place_name, address)
+        region_id_int = int(region_id)
+        key = (region_id_int, place_name, address)
         if key in place_key_to_id:
             continue
-        existing_id = _get_existing_place_id(int(region_id), place_name, address)
+        existing_id = _get_existing_place_id(region_id_int, place_name, address)
         if existing_id:
             place_key_to_id[key] = existing_id
             continue
         place_rows.append(
             {
-                "region_id": int(region_id),
+                "region_id": region_id_int,
                 "place_name": place_name,
                 "place_category": _normalize_category_kr(row.get("place_category")),
                 "ai_tag": row.get("place_category"),
@@ -436,15 +633,17 @@ def import_cliproute_csv(
                 "updated_at": datetime.now(),
             }
         )
+        # mark as queued to avoid duplicates before insert
+        place_key_to_id[key] = -1
 
     if place_rows:
         place_rows = [_clean_nan(r) for r in place_rows]
-        insert_rows("places", list(place_rows[0].keys()), place_rows)
+        inserted = insert_rows("places", list(place_rows[0].keys()), place_rows)
         for r in place_rows:
-            existing_id = _get_existing_place_id(region_id, r["place_name"], r["address"])
+            existing_id = _get_existing_place_id(r["region_id"], r["place_name"], r["address"])
             if existing_id:
-                place_key_to_id[(r["place_name"], r["address"])] = existing_id
-        result["places"] += len(place_rows)
+                place_key_to_id[(r["region_id"], r["place_name"], r["address"])] = existing_id
+        result["places"] += inserted
 
     # courses
     course_title_to_id: Dict[str, int] = {}
@@ -460,7 +659,7 @@ def import_cliproute_csv(
         if pd.isna(region_id):
             result["skipped"] += 1
             continue
-        existing_id = _get_existing_course_id(int(region_id), author_id, title)
+        existing_id = _get_existing_course_id(title)
         if existing_id:
             course_title_to_id[title] = existing_id
             continue
@@ -500,12 +699,12 @@ def import_cliproute_csv(
 
     if course_rows:
         course_rows = [_clean_nan(r) for r in course_rows]
-        insert_rows("courses", list(course_rows[0].keys()), course_rows)
+        inserted = insert_rows("courses", list(course_rows[0].keys()), course_rows)
         for r in course_rows:
-            existing_id = _get_existing_course_id(region_id, author_id, r["title"])
+            existing_id = _get_existing_course_id(r["title"])
             if existing_id:
                 course_title_to_id[r["title"]] = existing_id
-        result["courses"] += len(course_rows)
+        result["courses"] += inserted
 
     # course_place
     course_place_rows = []
@@ -528,21 +727,26 @@ def import_cliproute_csv(
         visit_day = row.get("visit_day")
         visit_order = row.get("visit_order")
 
+        visit_day_val = int(visit_day) if pd.notna(visit_day) else None
+        visit_order_val = int(visit_order) if pd.notna(visit_order) else None
+        if _exists_course_place(course_id, place_id, visit_day_val, visit_order_val):
+            result["skipped"] += 1
+            continue
+
         course_place_rows.append(
             {
                 "course_id": course_id,
                 "place_id": place_id,
-                "visit_day": int(visit_day) if pd.notna(visit_day) else None,
-                "visit_order": int(visit_order) if pd.notna(visit_order) else None,
+                "visit_day": visit_day_val,
+                "visit_order": visit_order_val,
                 "deleted_at": None,
                 "created_at": datetime.now(),
                 "updated_at": datetime.now(),
             }
         )
-
     if course_place_rows:
         course_place_rows = [_clean_nan(r) for r in course_place_rows]
-        insert_rows("course_place", list(course_place_rows[0].keys()), course_place_rows)
-        result["course_place"] += len(course_place_rows)
+        inserted = insert_rows("course_place", list(course_place_rows[0].keys()), course_place_rows)
+        result["course_place"] += inserted
 
     return result

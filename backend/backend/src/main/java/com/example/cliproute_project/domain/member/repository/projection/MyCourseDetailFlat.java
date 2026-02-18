@@ -9,15 +9,13 @@ import java.time.LocalDateTime;
 public record MyCourseDetailFlat(
         Long courseId,
         String courseTitle,
-        Long regionId,             // 추가
+        Long regionId,
         String regionName,
-        String regionRepImageUrl,
-        String videoUrl,           // 추가
-        String thumbnailUrl,
+        String ytVideoId,
         Long memberCourseId,
-        String nickname,
+        String channelName,
         Boolean isMine,
-        Boolean isScrapped,        // 추가
+        Boolean isScrapped,
         TravelStatus travelStatus,
         String memo,
         LocalDate startDate,

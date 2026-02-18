@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "MEMBER_NOTIFICATION")
+@Table(name = "member_notification")
 public class MemberNotification extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

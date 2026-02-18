@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "VIDEOS")
+@Table(name = "videos")
 public class Video extends BaseEntity {
 
     @Id
@@ -38,7 +38,7 @@ public class Video extends BaseEntity {
     private String channelName;
 
     // 업로드일
-    @Column(name = "upload_date", nullable = false)
+    @Column(name = "upload_date")
     private LocalDateTime uploadDate;
 
     // 썸네일 url
@@ -46,7 +46,7 @@ public class Video extends BaseEntity {
     private String thumbnailUrl;
 
     // 영상 길이 (sec)
-    @Column(name = "duration", nullable = false)
+    @Column(name = "duration")
     private Integer duration;
     
     // 자막 여부

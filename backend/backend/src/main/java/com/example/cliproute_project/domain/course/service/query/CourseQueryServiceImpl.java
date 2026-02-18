@@ -30,8 +30,6 @@ import static com.example.cliproute_project.global.common.converter.SliceConvert
 @Transactional(readOnly = true) // 조회 성능 최적화
 public class CourseQueryServiceImpl implements CourseQueryService {
 
-    private static final String YOUTUBE_WATCH_URL_PREFIX = "https://www.youtube.com/watch?v=";
-
     private final CourseRepository courseRepository;
     private final CourseDetailQueryRepository courseDetailQueryRepository;
     private final MemberCourseRepository memberCourseRepository;
@@ -140,8 +138,7 @@ public class CourseQueryServiceImpl implements CourseQueryService {
         return new CourseResDTO.CourseDetailDTO(
                 course.getId(),
                 course.getSourceVideo().getTitle(),
-                buildYoutubeUrl(course.getSourceVideo().getYtVideoId()),
-                course.getSourceVideo().getThumbnailUrl(),
+                course.getSourceVideo().getYtVideoId(),
                 course.getSourceVideo().getChannelName(),
                 course.getRegion().getId(),
                 course.getRegion().getRegionName(),
@@ -170,10 +167,6 @@ public class CourseQueryServiceImpl implements CourseQueryService {
     }
 
     // 유튜브 url 생성 메서드
-    private String buildYoutubeUrl(String ytVideoId) {
-        return YOUTUBE_WATCH_URL_PREFIX + ytVideoId;
-    }
-
     // 스크랩/여행상태 record 정의, 비로그인 시 디폴트값 주는 메서드
     private record ScrapState(boolean isScrapped, TravelStatus travelStatus) {
         static ScrapState defaultState() {

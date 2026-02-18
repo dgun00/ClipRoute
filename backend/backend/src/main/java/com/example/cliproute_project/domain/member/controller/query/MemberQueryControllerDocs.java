@@ -29,7 +29,7 @@ public interface MemberQueryControllerDocs {
 
     @Operation(
             summary = "[7 API] My course list",
-            description = "Returns my course list with filters and no-offset pagination."
+            description = "Returns my course list with filters and no-offset pagination. Includes yt_video_id."
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Swagger response"),
@@ -49,7 +49,7 @@ public interface MemberQueryControllerDocs {
 
     @Operation(
             summary = "[9 API] My course detail",
-            description = "Returns my course detail with course info and itineraries."
+            description = "Returns my course detail with course info and itineraries. Includes yt_video_id."
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Swagger response"),

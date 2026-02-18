@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "MEMBER_TERM")
+@Table(name = "member_term")
 public class MemberTerm extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

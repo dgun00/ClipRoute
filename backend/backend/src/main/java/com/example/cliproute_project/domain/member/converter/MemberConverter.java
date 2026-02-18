@@ -52,8 +52,6 @@ public class MemberConverter {
     }
 
     private static MemberResDTO.MyCourseDTO toMyCourseDTO(MyCourseListFlat flat) {
-        String thumbnailUrl =
-                (flat.courseImageUrl() != null && !flat.courseImageUrl().isBlank()) ? flat.courseImageUrl() : flat.videoThumbnailUrl();
         Integer placeCount = flat.placeCount() != null ? flat.placeCount().intValue() : 0;
 
         return MemberResDTO.MyCourseDTO.builder()
@@ -61,8 +59,7 @@ public class MemberConverter {
                 .memberCourseId(flat.memberCourseId())
                 .courseTitle(flat.courseTitle())
                 .regionName(flat.regionName())
-                .regionRepImageUrl(flat.regionRepImageUrl())
-                .thumbnailUrl(thumbnailUrl)
+                .ytVideoId(flat.ytVideoId())
                 .startDate(flat.startDate())
                 .endDate(flat.endDate())
                 .travelDays(flat.travelDays())
@@ -93,9 +90,8 @@ public class MemberConverter {
         return MemberResDTO.MyCourseDetailDTO.builder()
                 .courseId(base.courseId())
                 .videoTitle(base.courseTitle())
-                .videoUrl(buildYoutubeUrl(base.videoUrl()))
-                .thumbnailUrl(base.thumbnailUrl())
-                .channelName(base.nickname())
+                .ytVideoId(base.ytVideoId())
+                .channelName(base.channelName())
                 .regionId(base.regionId())
                 .regionName(base.regionName())
                 .isScrapped(base.isScrapped())

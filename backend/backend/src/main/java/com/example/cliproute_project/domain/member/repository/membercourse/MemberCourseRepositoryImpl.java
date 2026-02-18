@@ -2,9 +2,6 @@ package com.example.cliproute_project.domain.member.repository.membercourse;
 
 import com.example.cliproute_project.domain.course.entity.QCourse;
 import com.example.cliproute_project.domain.course.entity.mapping.QCoursePlace;
-import com.example.cliproute_project.domain.image.entity.QImage;
-import com.example.cliproute_project.domain.image.entity.mapping.QImageCourse;
-import com.example.cliproute_project.domain.image.enums.ImageType;
 import com.example.cliproute_project.domain.member.entity.mapping.MemberCourse;
 import com.example.cliproute_project.domain.member.entity.mapping.QMemberCourse;
 import com.example.cliproute_project.domain.member.enums.TravelStatus;
@@ -197,8 +194,6 @@ public class MemberCourseRepositoryImpl implements MemberCourseRepositoryCustom 
         QCourse c = QCourse.course;
         QRegion r = QRegion.region;
         QVideo v = QVideo.video;
-        QImageCourse ic = QImageCourse.imageCourse;
-        QImage img = QImage.image;
         QCoursePlace cp = QCoursePlace.coursePlace;
 
         return queryFactory
@@ -208,9 +203,7 @@ public class MemberCourseRepositoryImpl implements MemberCourseRepositoryCustom 
                         mc.id,
                         c.title,
                         r.regionName,
-                        r.imageUrl,
-                        img.imageUrl,
-                        v.thumbnailUrl,
+                        v.ytVideoId,
                         mc.startDate,
                         mc.endDate,
                         c.travelDays,
@@ -223,8 +216,6 @@ public class MemberCourseRepositoryImpl implements MemberCourseRepositoryCustom 
                 .join(mc.course, c)
                 .join(c.region, r)
                 .join(c.sourceVideo, v)
-                .leftJoin(ic).on(ic.course.eq(c).and(ic.imageType.eq(ImageType.REPRESENTATIVE)))
-                .leftJoin(ic.image, img)
                 .leftJoin(cp).on(cp.course.eq(c).and(cp.deletedAt.isNull()))
                 .where(
                         mc.member.id.eq(memberId),
@@ -241,9 +232,7 @@ public class MemberCourseRepositoryImpl implements MemberCourseRepositoryCustom 
                         c.id,
                         c.title,
                         r.regionName,
-                        r.imageUrl,
-                        img.imageUrl,
-                        v.thumbnailUrl,
+                        v.ytVideoId,
                         mc.startDate,
                         mc.endDate,
                         c.travelDays,
@@ -293,34 +282,34 @@ public class MemberCourseRepositoryImpl implements MemberCourseRepositoryCustom 
         return queryFactory
                 .select(Projections.constructor(
                         MyCourseDetailFlat.class,
-                        c.id,                        // 1. courseId
-                        c.title,                     // 2. courseTitle
-                        r.id,                        // 3. regionId (추가됨!)
-                        r.regionName,                // 4. regionName
-                        r.imageUrl,                  // 5. regionRepImageUrl
-                        v.ytVideoId,                 // 6. videoUrl (추가됨!)
-                        v.thumbnailUrl,              // 7. thumbnailUrl
-                        mc.id,                       // 8. memberCourseId
-                        mc.member.nickname,          // 9. nickname
-                        mc.member.id.eq(memberId),   // 10. isMine
-                        mc.isScrapped,               // 11. isScrapped (추가됨!)
-                        mc.travelStatus,             // 12. travelStatus
-                        c.description,               // 13. memo
-                        mc.startDate,                // 14. startDate
-                        mc.endDate,                  // 15. endDate
-                        c.travelDays,                // 16. travelDays
+                        c.id,                        // 1. courseId (Long)
+                        c.title,                     // 2. courseTitle (String)
+                        r.id,                        // 3. regionId (Long)
+                        r.regionName,                // 4. regionName (String)
+                        v.ytVideoId,                 // 5. ytVideoId (String)
+                        mc.id,                       // 6. memberCourseId (Long)
+                        v.channelName,               // 7. channelName (String)
+                        mc.member.id.eq(memberId),   // 8. isMine (Boolean)
+                        mc.isScrapped,               // 9. isScrapped (Boolean)
+                        mc.travelStatus,             // 10. travelStatus (Enum)
+                        c.description,               // 11. memo (String)
+                        mc.startDate,                // 12. startDate (LocalDate)
+                        mc.endDate,                  // 13. endDate (LocalDate)
+                        c.travelDays,                // 14. travelDays (Integer)
+//                        com.querydsl.core.types.dsl.Expressions.asNumber(0).as("likeCount"),  // 14. Integer
+//                        com.querydsl.core.types.dsl.Expressions.asNumber(0L).as("scrapCount"), // 15. Long
 
-                        cp.id,                       // 17. coursePlaceId
-                        p.id,                        // 18. placeId
-                        cp.visitOrder,               // 19. visitOrder
-                        p.placeName,                 // 20. placeName
-                        p.placeCategory,             // 21. placeCategory
-                        p.address,                   // 22. address
-                        p.lat,                       // 23. latitude
-                        p.lng,                       // 24. longitude
-                        cp.visitDay,                 // 25. visitDay
-                        com.querydsl.core.types.dsl.Expressions.asNumber(0), // 26. timestamp (임시 0 처리)
-                        p.updatedAt                  // 27. updatedAt
+                        cp.id,                       // 16. coursePlaceId (Long)
+                        p.id,                        // 17. placeId (Long)
+                        cp.visitOrder,               // 18. visitOrder (Integer)
+                        p.placeName,                 // 19. placeName (String)
+                        p.placeCategory,             // 20. placeCategory (Enum)
+                        p.address,                   // 21. address (String)
+                        p.lat,                       // 22. latitude (Double)
+                        p.lng,                       // 23. longitude (Double)
+                        cp.visitDay,                 // 24. visitDay (Integer)
+//                        vp.timestamp,                // 25. timestamp (Integer)
+                        p.updatedAt                  // 26. updatedAt (LocalDateTime)
                 ))
                 .from(c)
                 .join(c.region, r)

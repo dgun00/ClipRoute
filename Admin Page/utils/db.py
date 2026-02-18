@@ -107,9 +107,10 @@ def count_rows(table_name):
     return int(row["cnt"]) if row else 0
 
 
-def fetch_table_rows(table_name, limit=200, offset=0, order_by="id"):
+def fetch_table_rows(table_name, limit=200, offset=0, order_by="id", desc=True):
+    direction = "DESC" if desc else "ASC"
     return fetch_all(
-        f"SELECT * FROM `{table_name}` ORDER BY `{order_by}` DESC LIMIT %s OFFSET %s",
+        f"SELECT * FROM `{table_name}` ORDER BY `{order_by}` {direction} LIMIT %s OFFSET %s",
         [int(limit), int(offset)],
     )
 

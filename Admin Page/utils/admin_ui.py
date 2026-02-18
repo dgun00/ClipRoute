@@ -1,8 +1,12 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+import os
 import pandas as pd
 import streamlit as st
+import requests
+import boto3
+from botocore.exceptions import ClientError
 
 from utils.db import (
     count_rows,
@@ -12,11 +16,89 @@ from utils.db import (
     get_table_schema,
     insert_rows,
     update_row,
+    fetch_one,
 )
 from utils.entities import EntityConfig
 
 
 READ_ONLY_DEFAULTS = {"id", "created_at", "updated_at"}
+
+S3_BUCKET = os.getenv("S3_BUCKET") or os.getenv("AWS_S3_BUCKET")
+S3_REGION = os.getenv("AWS_REGION") or os.getenv("AWS_DEFAULT_REGION") or "ap-northeast-2"
+
+
+def _get_s3_client():
+    access_key = os.getenv("AWS_ACCESS_KEY_ID")
+    secret_key = os.getenv("AWS_SECRET_ACCESS_KEY")
+    if not (access_key and secret_key and S3_BUCKET):
+        raise RuntimeError("S3 설정이 필요합니다. (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET)")
+    return boto3.client(
+        "s3",
+        region_name=S3_REGION,
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+    )
+
+
+def _s3_url_for_key(key: str) -> str:
+    return f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com/{key}"
+
+
+def _normalize_github_url(url: str) -> str:
+    u = (url or "").strip()
+    if not u:
+        return ""
+    if "raw.githubusercontent.com" in u:
+        return u
+    if "github.com/" in u and "/blob/" in u:
+        return u.replace("github.com/", "raw.githubusercontent.com/").replace("/blob/", "/")
+    return u
+
+
+def _get_extension_from_url(url: str) -> str:
+    clean = (url or "").split("?")[0].split("#")[0]
+    _, ext = os.path.splitext(clean)
+    if ext:
+        return ext.lower()
+    return ""
+
+
+def _upload_image_from_url_to_s3(image_url: str, key: str) -> str:
+    if not image_url:
+        raise ValueError("이미지 URL이 비어 있습니다.")
+    s3 = _get_s3_client()
+    resp = requests.get(image_url, stream=True, timeout=20)
+    if resp.status_code != 200:
+        raise ValueError(f"이미지 다운로드 실패 (HTTP {resp.status_code})")
+    content_type = resp.headers.get("Content-Type") or "image/jpeg"
+    s3.upload_fileobj(resp.raw, S3_BUCKET, key, ExtraArgs={"ContentType": content_type})
+    return _s3_url_for_key(key)
+
+
+def _confirm_delete(action_key: str, button_label: str, message: str) -> bool:
+    if hasattr(st, "dialog"):
+        if st.button(button_label, type="primary", key=f"{action_key}_open"):
+            st.session_state[f"{action_key}_open"] = True
+        if st.session_state.get(f"{action_key}_open"):
+            confirmed_key = f"{action_key}_confirmed"
+
+            @st.dialog("삭제 확인")
+            def _dialog():
+                st.write(message)
+                if st.button("삭제", type="primary", key=confirmed_key):
+                    st.session_state[confirmed_key] = True
+
+            _dialog()
+            if st.session_state.get(confirmed_key):
+                st.session_state[f"{action_key}_open"] = False
+                st.session_state[confirmed_key] = False
+                return True
+        return False
+
+    # Fallback when dialog is unavailable
+    st.warning(message)
+    confirm = st.checkbox("확인했습니다", key=f"{action_key}_check")
+    return st.button(button_label, type="primary", key=f"{action_key}_confirm") and confirm
 
 
 def _is_missing(value: Any) -> bool:
@@ -86,98 +168,148 @@ def _apply_filters(
 ) -> pd.DataFrame:
     if df.empty:
         return df
+    if config.key == "regions":
+        return df
 
-    st.subheader("필터")
-    with st.expander("필터 옵션", expanded=False):
-        search = st.text_input("전체 검색", key=f"{config.key}_filter_search")
-        if search:
-            mask = pd.Series([False] * len(df))
-            for col in df.columns:
-                mask = mask | df[col].astype(str).str.contains(search, case=False, na=False)
-            df = df[mask]
+    st.subheader("검색")
+    with st.expander("필터 설정", expanded=False):
+        # Course-specific dropdown filters (AND semantics)
+        if config.key == "courses":
+            def _to_bool_int(v):
+                if v is None:
+                    return None
+                if isinstance(v, (bytes, bytearray)):
+                    return 1 if v in (b"\x01", b"1", b"true", b"True") else 0
+                if isinstance(v, bool):
+                    return 1 if v else 0
+                if isinstance(v, (int, float)):
+                    return 1 if int(v) == 1 else 0
+                if isinstance(v, str):
+                    s = v.strip().lower()
+                    if s in ("1", "true", "t", "y", "yes"):
+                        return 1
+                    if s in ("0", "false", "f", "n", "no"):
+                        return 0
+                return None
 
-        for col in df.columns:
-            series = df[col]
-            col_type = schema_map.get(col, {}).get("Type", "")
-            norm = _normalize_type(col_type)
-
-            if norm == "int":
-                min_val = series.min()
-                max_val = series.max()
-                if pd.notna(min_val) and pd.notna(max_val):
-                    min_input, max_input = st.slider(
-                        f"{col} 범위",
-                        int(min_val),
-                        int(max_val),
-                        (int(min_val), int(max_val)),
-                        key=f"{config.key}_filter_{col}_range",
+            filter_cols = [
+                ("source_video_id", "원본 영상 ID"),
+                ("original_course_id", "원본 코스 ID"),
+                ("region_id", "지역 ID"),
+                ("author_id", "작성자 ID"),
+                ("is_customized", "커스텀 코스 여부"),
+                ("is_rep", "대표 코스 여부"),
+            ]
+            for col, label in filter_cols:
+                if col not in df.columns:
+                    continue
+                if col == "is_customized":
+                    options = [
+                        ("전체", None),
+                        ("true", 1),
+                        ("false", 0),
+                    ]
+                    selected = st.selectbox(
+                        label,
+                        options=options,
+                        index=0,
+                        format_func=lambda x: x[0],
+                        key=f"{config.key}_filter_{col}_bool",
                     )
-                    df = df[(df[col] >= min_input) & (df[col] <= max_input)]
-                continue
-
-            if norm == "float":
-                min_val = series.min()
-                max_val = series.max()
-                if pd.notna(min_val) and pd.notna(max_val):
-                    min_input, max_input = st.slider(
-                        f"{col} 범위",
-                        float(min_val),
-                        float(max_val),
-                        (float(min_val), float(max_val)),
-                        key=f"{config.key}_filter_{col}_range",
+                    if selected[1] is not None:
+                        series_bool = df[col].map(_to_bool_int)
+                        df = df[series_bool == selected[1]]
+                    continue
+                if col == "is_rep":
+                    options = [
+                        ("전체", None),
+                        ("true", 1),
+                        ("false", 0),
+                    ]
+                    selected = st.selectbox(
+                        label,
+                        options=options,
+                        index=0,
+                        format_func=lambda x: x[0],
+                        key=f"{config.key}_filter_{col}_bool",
                     )
-                    df = df[(df[col] >= min_input) & (df[col] <= max_input)]
-                continue
+                    if selected[1] is not None:
+                        series_bool = df[col].map(_to_bool_int)
+                        df = df[series_bool == selected[1]]
+                    continue
 
-            if norm == "bool":
+                options = sorted([x for x in df[col].dropna().unique().tolist()])
                 selected = st.selectbox(
-                    f"{col} 값",
-                    options=["전체", "true", "false"],
+                    label,
+                    options=["전체"] + options,
                     index=0,
-                    key=f"{config.key}_filter_{col}_bool",
+                    key=f"{config.key}_filter_{col}_eq",
                 )
                 if selected != "전체":
-                    df = df[df[col].astype(str).str.lower() == selected]
-                continue
+                    df = df[df[col] == selected]
 
-            if norm in ("datetime", "date"):
-                min_date = pd.to_datetime(series, errors="coerce").min()
-                max_date = pd.to_datetime(series, errors="coerce").max()
-                if pd.notna(min_date) and pd.notna(max_date):
-                    start, end = st.date_input(
-                        f"{col} 날짜 범위",
-                        value=(min_date.date(), max_date.date()),
-                        key=f"{config.key}_filter_{col}_date",
-                    )
-                    df = df[
-                        (pd.to_datetime(df[col], errors="coerce") >= pd.to_datetime(start))
-                        & (pd.to_datetime(df[col], errors="coerce") <= pd.to_datetime(end))
-                    ]
-                continue
-
-            if col in config.enum_columns:
-                options = config.enum_columns[col]
-                selected = st.multiselect(
-                    f"{col} 선택",
-                    options=options,
-                    default=options,
-                    key=f"{config.key}_filter_{col}_enum",
+        if config.key == "courses":
+            search = st.text_input("검색 (코스 ID)", key=f"{config.key}_filter_search")
+            if search:
+                if "id" in df.columns:
+                    df = df[df["id"].astype(str).str.contains(search, case=False, na=False)]
+        elif config.key == "images":
+            search = st.text_input("검색 (original_name)", key=f"{config.key}_filter_search")
+            if search and "original_name" in df.columns:
+                df = df[df["original_name"].astype(str).str.contains(search, case=False, na=False)]
+        elif config.key == "members":
+            member_filters = [
+                ("gender", "성별"),
+                ("status", "상태"),
+                ("role", "권한"),
+                ("age_range", "연령대"),
+            ]
+            for col, label in member_filters:
+                if col not in df.columns:
+                    continue
+                options = sorted([x for x in df[col].dropna().unique().tolist()])
+                selected = st.selectbox(
+                    label,
+                    options=["전체"] + options,
+                    index=0,
+                    key=f"{config.key}_filter_{col}_eq",
                 )
-                if selected:
-                    df = df[df[col].isin(selected)]
-                continue
-
-            unique_count = series.nunique(dropna=True)
-            if unique_count <= 20:
-                options = [x for x in series.dropna().unique().tolist()]
-                selected = st.multiselect(
-                    f"{col} 선택",
-                    options=options,
-                    default=options,
-                    key=f"{config.key}_filter_{col}_multi",
+                if selected != "전체":
+                    df = df[df[col] == selected]
+            nickname_search = st.text_input("닉네임 검색", key=f"{config.key}_filter_nickname")
+            if nickname_search and "nickname" in df.columns:
+                df = df[df["nickname"].astype(str).str.contains(nickname_search, case=False, na=False)]
+        elif config.key == "places":
+            if "region_id" in df.columns:
+                options = sorted([x for x in df["region_id"].dropna().unique().tolist()])
+                selected = st.selectbox(
+                    "지역 ID",
+                    options=["전체"] + options,
+                    index=0,
+                    key=f"{config.key}_filter_region_id",
                 )
-                if selected:
-                    df = df[df[col].isin(selected)]
+                if selected != "전체":
+                    df = df[df["region_id"] == selected]
+            if "place_category" in df.columns:
+                options = sorted([x for x in df["place_category"].dropna().unique().tolist()])
+                selected = st.selectbox(
+                    "카테고리",
+                    options=["전체"] + options,
+                    index=0,
+                    key=f"{config.key}_filter_place_category",
+                )
+                if selected != "전체":
+                    df = df[df["place_category"] == selected]
+            place_name_search = st.text_input("장소명 검색", key=f"{config.key}_filter_place_name")
+            if place_name_search and "place_name" in df.columns:
+                df = df[df["place_name"].astype(str).str.contains(place_name_search, case=False, na=False)]
+        else:
+            search = st.text_input("통합 검색", key=f"{config.key}_filter_search")
+            if search:
+                mask = pd.Series([False] * len(df))
+                for col in df.columns:
+                    mask = mask | df[col].astype(str).str.contains(search, case=False, na=False)
+                df = df[mask]
 
     return df
 
@@ -202,6 +334,22 @@ def _render_input(
     required: bool = False,
     key: Optional[str] = None,
 ):
+    if config.key == "courses" and col_name == "is_rep":
+        options = ["true", "false"]
+        val_str = str(value).strip().lower() if value is not None else "false"
+        if isinstance(value, (bytes, bytearray)):
+            val_str = "true" if value in (b"\x01", b"1", b"true", b"True") else "false"
+        elif isinstance(value, bool):
+            val_str = "true" if value else "false"
+        elif isinstance(value, (int, float)):
+            val_str = "true" if int(value) == 1 else "false"
+        idx = options.index("true") if val_str == "true" else options.index("false")
+        selected = st.selectbox(col_name, options=options, index=idx, key=key)
+        return selected
+
+    if config.key == "images" and col_name == "file_size":
+        return st.text_input(col_name, value="", disabled=True, key=key)
+
     if col_name in config.enum_columns:
         options = config.enum_columns[col_name]
         index = options.index(value) if value in options else 0
@@ -256,32 +404,102 @@ def render_entity_page(config: EntityConfig):
     try:
         schema_rows = get_table_schema(config.table)
     except Exception as exc:
-        st.error(f"테이블 조회 실패: {exc}")
+        st.error(f"스키마 조회 실패: {exc}")
         return
     schema_map = _get_schema_map(schema_rows)
     display_columns = config.display_columns or [row["Field"] for row in schema_rows]
     required_columns = _get_required_columns(schema_rows, config)
 
-    tabs = st.tabs(["목록", "추가", "수정", "삭제"])
+    if config.key == "courses":
+        tabs = st.tabs(["조회", "수정"])
+    elif config.key == "regions":
+        tabs = st.tabs(["조회", "추가", "수정", "지역이미지 추가"])
+    elif config.key in ("members", "images", "places"):
+        tabs = st.tabs(["조회", "추가", "수정"])
+    else:
+        tabs = st.tabs(["조회", "추가", "수정", "삭제"])
 
     with tabs[0]:
         total = count_rows(config.table)
-        st.metric("총 데이터", total)
+        metric_col, limit_col, page_col = st.columns([2, 1, 1])
+        metric_col.metric("총 건수", total)
 
-        limit = st.selectbox(
+        limit = limit_col.selectbox(
             "표시 개수",
             options=[50, 100, 200, 500],
             index=2,
             key=f"{config.key}_limit",
         )
-        rows = fetch_table_rows(config.table, limit=limit, offset=0, order_by=config.pk)
+        page_count = max(1, (total + limit - 1) // limit)
+        page = page_col.number_input(
+            "페이지",
+            min_value=1,
+            max_value=page_count,
+            value=1,
+            step=1,
+            key=f"{config.key}_page",
+        )
+
+        if config.key == "courses":
+            if "id" in [r["Field"] for r in schema_rows]:
+                sort_col = "id"
+            else:
+                sort_col = [r["Field"] for r in schema_rows][0]
+            sort_desc = True
+        elif config.key == "members":
+            if "id" in [r["Field"] for r in schema_rows]:
+                sort_col = "id"
+            else:
+                sort_col = [r["Field"] for r in schema_rows][0]
+            sort_desc = True
+        elif config.key == "images":
+            if "id" in [r["Field"] for r in schema_rows]:
+                sort_col = "id"
+            else:
+                sort_col = [r["Field"] for r in schema_rows][0]
+            sort_desc = True
+        elif config.key == "places":
+            if "id" in [r["Field"] for r in schema_rows]:
+                sort_col = "id"
+            else:
+                sort_col = [r["Field"] for r in schema_rows][0]
+            sort_desc = True
+        elif config.key == "regions":
+            if "id" in [r["Field"] for r in schema_rows]:
+                sort_col = "id"
+            else:
+                sort_col = [r["Field"] for r in schema_rows][0]
+            sort_desc = True
+        else:
+            sort_col = st.selectbox(
+                "정렬 컬럼",
+                options=[c for c in display_columns if c in [r["Field"] for r in schema_rows]],
+                index=0 if "id" not in display_columns else display_columns.index("id"),
+                key=f"{config.key}_sort_col",
+            )
+            sort_desc = st.checkbox("내림차순", value=True, key=f"{config.key}_sort_desc")
+
+        offset = (int(page) - 1) * int(limit)
+        rows = fetch_table_rows(config.table, limit=limit, offset=offset, order_by=sort_col, desc=sort_desc)
         if rows:
             df = pd.DataFrame(rows)
             for col in df.columns:
                 if col.endswith("_at"):
-                    df[col] = pd.to_datetime(df[col], errors="ignore")
-            if display_columns:
-                df = df[[col for col in display_columns if col in df.columns]]
+                    try:
+                        df[col] = pd.to_datetime(df[col])
+                    except Exception:
+                        pass
+
+            available_columns = [c for c in display_columns if c in df.columns]
+            selected_columns = st.multiselect(
+                "표시 컬럼",
+                options=df.columns.tolist(),
+                default=available_columns,
+                key=f"{config.key}_visible_cols",
+            )
+            if selected_columns:
+                df = df[selected_columns]
+
             df = _apply_filters(df, config, schema_map)
             st.dataframe(df, use_container_width=True, hide_index=True)
             csv = df.to_csv(index=False).encode("utf-8-sig")
@@ -289,39 +507,40 @@ def render_entity_page(config: EntityConfig):
         else:
             st.info("데이터가 없습니다.")
 
-    with tabs[1]:
-        st.subheader("새 데이터 추가")
-        with st.form(f"create_{config.key}"):
-            input_data = {}
-            for row in schema_rows:
-                field = row["Field"]
-                if field in config.read_only_columns or field in READ_ONLY_DEFAULTS:
-                    continue
-                input_data[field] = _render_input(
-                    field,
-                    row["Type"],
-                    config,
-                    required=field in required_columns,
-                    key=f"{config.key}_create_{field}",
-                )
-            submitted = st.form_submit_button("추가")
-            if submitted:
-                for key, val in list(input_data.items()):
-                    input_data[key] = _coerce_value(val, schema_map[key]["Type"])
-                for col in ["created_at", "updated_at"]:
-                    if col in schema_map and col not in input_data:
-                        input_data[col] = datetime.now()
-                missing = [c for c in required_columns if _is_missing(input_data.get(c))]
-                if missing:
-                    st.error(f"필수 값이 누락되었습니다: {', '.join(missing)}")
-                else:
-                    inserted = insert_rows(config.table, list(input_data.keys()), [input_data])
-                    if inserted:
-                        st.success("추가 완료")
+    if config.key != "courses":
+        with tabs[1]:
+            st.subheader("데이터 추가")
+            with st.form(f"create_{config.key}"):
+                input_data = {}
+                for row in schema_rows:
+                    field = row["Field"]
+                    if field in config.read_only_columns or field in READ_ONLY_DEFAULTS:
+                        continue
+                    input_data[field] = _render_input(
+                        field,
+                        row["Type"],
+                        config,
+                        required=field in required_columns,
+                        key=f"{config.key}_create_{field}",
+                    )
+                submitted = st.form_submit_button("저장")
+                if submitted:
+                    for key, val in list(input_data.items()):
+                        input_data[key] = _coerce_value(val, schema_map[key]["Type"])
+                    for col in ["created_at", "updated_at"]:
+                        if col in schema_map and col not in input_data:
+                            input_data[col] = datetime.now()
+                    missing = [c for c in required_columns if _is_missing(input_data.get(c))]
+                    if missing:
+                        st.error(f"필수 값이 누락되었습니다: {', '.join(missing)}")
                     else:
-                        st.error("추가 실패")
+                        inserted = insert_rows(config.table, list(input_data.keys()), [input_data])
+                        if inserted:
+                            st.success("저장 완료")
+                        else:
+                            st.error("저장 실패")
 
-    with tabs[2]:
+    with tabs[1 if config.key == "courses" else 2]:
         st.subheader("데이터 수정")
         rows = fetch_table_rows(config.table, limit=200, offset=0, order_by=config.pk)
         if not rows:
@@ -337,6 +556,27 @@ def render_entity_page(config: EntityConfig):
                 for row in schema_rows:
                     field = row["Field"]
                     if field == config.pk:
+                        continue
+                    if config.key == "courses" and field in ("is_customized", "deleted_at"):
+                        if field == "is_customized":
+                            display_val = selected_row.get(field)
+                            if isinstance(display_val, (bytes, bytearray)):
+                                display_val = "true" if display_val in (b"\x01", b"1", b"true", b"True") else "false"
+                            elif isinstance(display_val, bool):
+                                display_val = "true" if display_val else "false"
+                            elif isinstance(display_val, (int, float)):
+                                display_val = "true" if int(display_val) == 1 else "false"
+                            elif display_val is None:
+                                display_val = ""
+                            else:
+                                display_val = str(display_val)
+                            st.text_input(field, value=display_val, disabled=True, key=f"{config.key}_ro_{field}")
+                            update_data[field] = selected_row.get(field)
+                        continue
+                    if config.key == "members" and field == "deleted_at":
+                        display_val = selected_row.get(field)
+                        st.text_input(field, value=str(display_val) if display_val is not None else "", disabled=True, key=f"{config.key}_ro_{field}")
+                        update_data[field] = selected_row.get(field)
                         continue
                     if field in config.read_only_columns or field in READ_ONLY_DEFAULTS:
                         continue
@@ -364,21 +604,192 @@ def render_entity_page(config: EntityConfig):
                     else:
                         st.error("수정 실패")
 
-    with tabs[3]:
-        st.subheader("데이터 삭제")
-        rows = fetch_table_rows(config.table, limit=200, offset=0, order_by=config.pk)
-        if not rows:
-            st.info("삭제할 데이터가 없습니다.")
-        else:
-            df = pd.DataFrame(rows)
-            ids = df[config.pk].tolist()
-            selected_id = st.selectbox("삭제할 ID 선택", options=ids, key=f"{config.key}_delete_id")
-            if st.button("삭제", type="primary", key=f"{config.key}_delete_btn"):
-                deleted = delete_row(config.table, config.pk, selected_id)
-                if deleted:
-                    st.success("삭제 완료")
+            if config.key == "courses":
+                st.divider()
+                st.subheader("삭제")
+                if _confirm_delete(
+                    f"{config.key}_update_delete",
+                    "이 코스 삭제",
+                    "정말로 이 코스를 삭제할까요?",
+                ):
+                    deleted = delete_row(config.table, config.pk, selected_id)
+                    if deleted:
+                        st.success("삭제 완료")
+                        st.rerun()
+                    else:
+                        st.error("삭제 실패")
+            if config.key == "members":
+                st.divider()
+                st.subheader("삭제")
+                if _confirm_delete(
+                    f"{config.key}_update_delete",
+                    "이 멤버 삭제",
+                    "정말로 이 멤버를 삭제할까요?",
+                ):
+                    deleted = delete_row(config.table, config.pk, selected_id)
+                    if deleted:
+                        st.success("삭제 완료")
+                        st.rerun()
+                    else:
+                        st.error("삭제 실패")
+            if config.key == "regions":
+                st.divider()
+                st.subheader("삭제")
+                if _confirm_delete(
+                    f"{config.key}_update_delete",
+                    "이 지역 삭제",
+                    "정말로 이 지역을 삭제할까요?",
+                ):
+                    deleted = delete_row(config.table, config.pk, selected_id)
+                    if deleted:
+                        st.success("삭제 완료")
+                        st.rerun()
+                    else:
+                        st.error("삭제 실패")
+            if config.key == "images":
+                st.divider()
+                st.subheader("삭제")
+                if _confirm_delete(
+                    f"{config.key}_update_delete",
+                    "이 이미지 삭제",
+                    "정말로 이 이미지를 삭제할까요?",
+                ):
+                    deleted = delete_row(config.table, config.pk, selected_id)
+                    if deleted:
+                        st.success("삭제 완료")
+                        st.rerun()
+                    else:
+                        st.error("삭제 실패")
+            if config.key == "places":
+                st.divider()
+                st.subheader("삭제")
+                if _confirm_delete(
+                    f"{config.key}_update_delete",
+                    "이 장소 삭제",
+                    "정말로 이 장소를 삭제할까요?",
+                ):
+                    deleted = delete_row(config.table, config.pk, selected_id)
+                    if deleted:
+                        st.success("삭제 완료")
+                        st.rerun()
+                    else:
+                        st.error("삭제 실패")
+
+    if config.key not in ("courses", "members", "regions", "images", "places"):
+        with tabs[3]:
+            st.subheader("데이터 삭제")
+            rows = fetch_table_rows(config.table, limit=200, offset=0, order_by=config.pk)
+            if not rows:
+                st.info("삭제할 데이터가 없습니다.")
+            else:
+                df = pd.DataFrame(rows)
+                ids = df[config.pk].tolist()
+                selected_id = st.selectbox("삭제할 ID 선택", options=ids, key=f"{config.key}_delete_id")
+                if _confirm_delete(
+                    f"{config.key}_delete",
+                    "삭제",
+                    "정말로 삭제할까요?",
+                ):
+                    deleted = delete_row(config.table, config.pk, selected_id)
+                    if deleted:
+                        st.success("삭제 완료")
+                    else:
+                        st.error("삭제 실패")
+
+    if config.key == "regions":
+        with tabs[3]:
+            st.subheader("지역 이미지 추가")
+            rows = fetch_table_rows(config.table, limit=200, offset=0, order_by=config.pk)
+            if not rows:
+                st.info("등록된 지역이 없습니다.")
+            else:
+                df = pd.DataFrame(rows)
+                id_name_rows = (
+                    df[[config.pk, "region_name"]].dropna()
+                    if "region_name" in df.columns
+                    else df[[config.pk]]
+                )
+                options = id_name_rows[config.pk].tolist()
+                selected_id = st.selectbox(
+                    "지역 선택",
+                    options=options,
+                    format_func=lambda x: f"{x} | {id_name_rows[id_name_rows[config.pk] == x]['region_name'].iloc[0]}" if "region_name" in id_name_rows.columns else str(x),
+                    key=f"{config.key}_image_region_id",
+                )
+                github_url = st.text_input(
+                    "GitHub 이미지 URL",
+                    placeholder="https://github.com/user/repo/blob/main/path/to/image.jpg",
+                )
+                running_key = f"{config.key}_image_upload_running"
+                msg_key = f"{config.key}_image_upload_message"
+                status_key = f"{config.key}_image_upload_status"
+                payload_key = f"{config.key}_image_upload_payload"
+
+                is_running = st.session_state.get(running_key, False)
+                if is_running:
+                    st.info("업로드 중... 잠시만 기다려주세요.")
+                    st.button("업로드 중...", disabled=True)
                 else:
-                    st.error("삭제 실패")
+                    if st.button("S3 업로드 및 이미지 등록", type="primary", key=f"{config.key}_image_upload_btn"):
+                        st.session_state[msg_key] = ""
+                        st.session_state[status_key] = ""
+                        st.session_state[running_key] = True
+                        st.session_state[payload_key] = {
+                            "selected_id": selected_id,
+                            "github_url": github_url,
+                        }
+                        st.rerun()
+
+                if is_running and st.session_state.get(payload_key):
+                    payload = st.session_state.get(payload_key, {})
+                    try:
+                        input_url = (payload.get("github_url", "") or "").strip()
+                        raw_url = _normalize_github_url(input_url)
+                        filename = os.path.basename(raw_url.split("?")[0].split("#")[0]) or "region-image.jpg"
+                        key = f"images/regions/{filename}"
+                        s3_url = _upload_image_from_url_to_s3(raw_url, key)
+
+                        # regions.image_url 업데이트 (S3 URL 저장)
+                        update_row(
+                            config.table,
+                            config.pk,
+                            payload["selected_id"],
+                            {"image_url": s3_url, "updated_at": datetime.now()},
+                        )
+
+                        # images 엔티티 추가 (중복 방지: original_name)
+                        original_name = os.path.splitext(filename)[0]
+                        existing = fetch_one("SELECT id FROM images WHERE original_name = %s LIMIT 1", [original_name])
+                        if not existing:
+                            insert_rows(
+                                "images",
+                                ["image_url", "original_name", "created_at", "updated_at"],
+                                [
+                                    {
+                                        "image_url": s3_url,
+                                        "original_name": original_name,
+                                        "created_at": datetime.now(),
+                                        "updated_at": datetime.now(),
+                                    }
+                                ],
+                            )
+
+                        st.session_state[msg_key] = "지역 이미지가 업데이트되었습니다."
+                        st.session_state[status_key] = "success"
+                    except Exception as exc:
+                        st.session_state[msg_key] = f"이미지 업로드 실패: {exc}"
+                        st.session_state[status_key] = "error"
+                    finally:
+                        st.session_state[running_key] = False
+                        st.session_state[payload_key] = None
+                        st.rerun()
+
+                status = st.session_state.get(status_key)
+                message = st.session_state.get(msg_key)
+                if status == "success":
+                    st.success(message)
+                elif status == "error":
+                    st.error(message)
 
 
 def render_csv_upload(config: EntityConfig):
@@ -408,8 +819,8 @@ def render_csv_upload(config: EntityConfig):
     csv_cols = list(df.columns)
     mapping = {}
     for col in required_columns:
-        options = ["(미매핑)"] + csv_cols
-        default_value = col if col in csv_cols else "(미매핑)"
+        options = ["(미지정)"] + csv_cols
+        default_value = col if col in csv_cols else "(미지정)"
         mapping[col] = st.selectbox(
             f"{col} (필수)",
             options=options,
@@ -424,8 +835,8 @@ def render_csv_upload(config: EntityConfig):
     ]
     with st.expander("선택 컬럼 매핑", expanded=False):
         for col in optional_cols:
-            options = ["(사용 안 함)"] + csv_cols
-            default_value = col if col in csv_cols else "(사용 안 함)"
+            options = ["(사용 안함)"] + csv_cols
+            default_value = col if col in csv_cols else "(사용 안함)"
             mapping[col] = st.selectbox(
                 col,
                 options=options,
@@ -434,7 +845,7 @@ def render_csv_upload(config: EntityConfig):
             )
 
     if st.button("업로드"):
-        missing_required = [c for c in required_columns if mapping.get(c) in (None, "(미매핑)")]
+        missing_required = [c for c in required_columns if mapping.get(c) in (None, "(미지정)")]
         if missing_required:
             st.error(f"필수 컬럼 매핑이 누락되었습니다: {', '.join(missing_required)}")
             return
@@ -442,7 +853,7 @@ def render_csv_upload(config: EntityConfig):
         for _, row in df.iterrows():
             data = {}
             for db_col, csv_col in mapping.items():
-                if csv_col in ("(사용 안 함)", "(미매핑)"):
+                if csv_col in ("(사용 안함)", "(미지정)"):
                     continue
                 value = row.get(csv_col)
                 data[db_col] = _coerce_value(value, schema_map[db_col]["Type"])

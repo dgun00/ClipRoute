@@ -28,7 +28,7 @@ public interface MemberCommandControllerDocs {
     // [10 API]
     @Operation(
             summary = "[10 API] My course detail edit",
-            description = "Edits my course detail and returns updated detail."
+            description = "Edits my course detail and returns updated detail. Includes yt_video_id."
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Swagger response"),
