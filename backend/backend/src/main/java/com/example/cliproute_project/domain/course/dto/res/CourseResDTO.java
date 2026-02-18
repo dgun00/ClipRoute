@@ -40,8 +40,7 @@ public class CourseResDTO {
     public record CourseDetailDTO(
             Long courseId,
             String videoTitle,
-            String videoUrl,
-            String thumbnailUrl,
+            @JsonProperty("yt_video_id") String ytVideoId,
             String channelName,
             Long regionId,
             String regionName,
