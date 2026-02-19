@@ -334,8 +334,8 @@ def _render_input(
     required: bool = False,
     key: Optional[str] = None,
 ):
-    if config.key == "courses" and col_name == "is_rep":
-        options = ["true", "false"]
+    if config.key == "courses" and col_name in ("is_rep", "is_customized"):
+        options = [1, 0]
         val_str = str(value).strip().lower() if value is not None else "false"
         if isinstance(value, (bytes, bytearray)):
             val_str = "true" if value in (b"\x01", b"1", b"true", b"True") else "false"
@@ -343,8 +343,14 @@ def _render_input(
             val_str = "true" if value else "false"
         elif isinstance(value, (int, float)):
             val_str = "true" if int(value) == 1 else "false"
-        idx = options.index("true") if val_str == "true" else options.index("false")
-        selected = st.selectbox(col_name, options=options, index=idx, key=key)
+        idx = 0 if val_str == "true" else 1
+        selected = st.selectbox(
+            col_name,
+            options=options,
+            index=idx,
+            format_func=lambda x: "true" if x == 1 else "false",
+            key=key,
+        )
         return selected
 
     if config.key == "images" and col_name == "file_size":
@@ -361,6 +367,9 @@ def _render_input(
         ids = [row["id"] for row in options]
         if not ids:
             return st.number_input(col_name, value=int(value) if value is not None else 0, step=1, key=key)
+        allow_null = config.key == "courses" and col_name in ("original_course_id",)
+        if allow_null:
+            ids = [None] + ids
         if value in ids:
             idx = ids.index(value)
         else:
@@ -368,7 +377,7 @@ def _render_input(
         selected = st.selectbox(
             col_name,
             options=ids,
-            format_func=lambda x: f"{x} | {options[ids.index(x)]['label']}" if x in ids else str(x),
+            format_func=lambda x: "NULL" if x is None else f"{x} | {options[[o['id'] for o in options].index(x)]['label']}",
             index=idx,
             key=key,
         )
@@ -557,21 +566,7 @@ def render_entity_page(config: EntityConfig):
                     field = row["Field"]
                     if field == config.pk:
                         continue
-                    if config.key == "courses" and field in ("is_customized", "deleted_at"):
-                        if field == "is_customized":
-                            display_val = selected_row.get(field)
-                            if isinstance(display_val, (bytes, bytearray)):
-                                display_val = "true" if display_val in (b"\x01", b"1", b"true", b"True") else "false"
-                            elif isinstance(display_val, bool):
-                                display_val = "true" if display_val else "false"
-                            elif isinstance(display_val, (int, float)):
-                                display_val = "true" if int(display_val) == 1 else "false"
-                            elif display_val is None:
-                                display_val = ""
-                            else:
-                                display_val = str(display_val)
-                            st.text_input(field, value=display_val, disabled=True, key=f"{config.key}_ro_{field}")
-                            update_data[field] = selected_row.get(field)
+                    if config.key == "courses" and field == "deleted_at":
                         continue
                     if config.key == "members" and field == "deleted_at":
                         display_val = selected_row.get(field)
@@ -592,6 +587,16 @@ def render_entity_page(config: EntityConfig):
                 if submitted:
                     for key, val in list(update_data.items()):
                         update_data[key] = _coerce_value(val, schema_map[key]["Type"])
+                    if config.key == "courses":
+                        for bcol in ("is_customized", "is_rep"):
+                            if bcol in update_data:
+                                v = update_data[bcol]
+                                if isinstance(v, str):
+                                    v = v.strip().lower() in ("1", "true", "t", "y", "yes")
+                                if isinstance(v, bool):
+                                    update_data[bcol] = b"\x01" if v else b"\x00"
+                                elif isinstance(v, (int, float)):
+                                    update_data[bcol] = b"\x01" if int(v) == 1 else b"\x00"
                     missing = [c for c in required_columns if _is_missing(update_data.get(c))]
                     if missing:
                         st.error(f"필수 값이 누락되었습니다: {', '.join(missing)}")
