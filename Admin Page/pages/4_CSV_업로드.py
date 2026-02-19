@@ -69,25 +69,25 @@ if mode == "전처리 CSV(코스/장소 일괄)":
             df = normalize_preprocessed_df(df)
             df = df.dropna(how="all")
 
+            # latitude/longitude columns: accept either "위도/경도" or "lat/lng"
             # region_id must exist in CSV
             if "region_id" not in df.columns:
-                st.error(f"region_id ??? CSV? ??????. (file: {uploaded_file.name})")
+                st.error(f"region_id 컬럼을 CSV에 포함해주세요. (file: {uploaded_file.name})")
                 st.stop()
 
-            # latitude/longitude columns: accept either "??/??" or "lat/lng"
-            if "??" in df.columns and "??" in df.columns:
-                lat_col = "??"
-                lng_col = "??"
+            if "위도" in df.columns and "경도" in df.columns:
+                lat_col = "위도"
+                lng_col = "경도"
             elif "lat" in df.columns and "lng" in df.columns:
                 lat_col = "lat"
                 lng_col = "lng"
             else:
-                st.error(f"CSV? ??/??(?? lat/lng) ??? ??????. (file: {uploaded_file.name})")
+                st.error(f"CSV에 위도/경도(또는 lat/lng) 컬럼을 포함해주세요. (file: {uploaded_file.name})")
                 st.stop()
 
             region_id = df["region_id"].dropna().astype(int).iloc[0] if not df["region_id"].dropna().empty else None
             if region_id is None:
-                st.error(f"region_id ?? ?? ????. (file: {uploaded_file.name})")
+                st.error(f"region_id 값이 비어 있습니다. (file: {uploaded_file.name})")
                 st.stop()
 
             parsed_files.append({
@@ -99,9 +99,6 @@ if mode == "전처리 CSV(코스/장소 일괄)":
             })
 
         st.subheader("미리보기")
-
-
-        st.subheader("????")
         preview_idx = st.selectbox("Preview file", options=list(range(len(parsed_files))), format_func=lambda i: parsed_files[i]["name"]) 
         st.dataframe(parsed_files[preview_idx]["df"].head(20), use_container_width=True)
 
@@ -151,27 +148,24 @@ if mode == "전처리 CSV(코스/장소 일괄)":
                     for key in total:
                         total[key] += result.get(key, 0)
 
-                if len(file_results) == 1:
-                    result = file_results[0][1]
-                    message = (
-                        f"??: videos {result['videos']}? images {result['images']}? courses {result['courses']}?"
-                        f"places {result['places']}? course_place {result['course_place']}?"
-                        f"?????? {result.get('image_uploads', 0)}?"
-                    )
-                else:
-                    lines = []
-                    for name, result in file_results:
-                        lines.append(
-                            f"{name}: videos {result['videos']} images {result['images']} "
-                            f"courses {result['courses']} places {result['places']} "
-                            f"course_place {result['course_place']} image_uploads {result.get('image_uploads', 0)}"
-                        )
-                    lines.append(
-                        f"TOTAL: videos {total['videos']} images {total['images']} "
-                        f"courses {total['courses']} places {total['places']} "
-                        f"course_place {total['course_place']} image_uploads {total['image_uploads']}"
-                    )
-                    message = "\n".join(lines)
+                lines = []
+                for name, result in file_results:
+                    lines.append(f"? {name}")
+                    lines.append(f"  - videos: {result['videos']}")
+                    lines.append(f"  - images: {result['images']}")
+                    lines.append(f"  - courses: {result['courses']}")
+                    lines.append(f"  - places: {result['places']}")
+                    lines.append(f"  - course_place: {result['course_place']}")
+                    lines.append(f"  - image_uploads: {result.get('image_uploads', 0)}")
+                    lines.append("")
+                lines.append("TOTAL")
+                lines.append(f"  - videos: {total['videos']}")
+                lines.append(f"  - images: {total['images']}")
+                lines.append(f"  - courses: {total['courses']}")
+                lines.append(f"  - places: {total['places']}")
+                lines.append(f"  - course_place: {total['course_place']}")
+                lines.append(f"  - image_uploads: {total['image_uploads']}")
+                message = "\n".join(lines)
                 st.success(message)
                 st.session_state["csv_upload_done"] = True
                 st.session_state["csv_upload_message"] = message
