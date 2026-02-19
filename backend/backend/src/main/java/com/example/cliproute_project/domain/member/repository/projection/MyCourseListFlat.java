@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 // [7 API]
 public record MyCourseListFlat(
         Long courseId,
+        Long originalCourseId,
         Long memberCourseId,
         String courseTitle,
         String regionName,

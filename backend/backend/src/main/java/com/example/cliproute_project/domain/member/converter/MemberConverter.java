@@ -56,6 +56,7 @@ public class MemberConverter {
 
         return MemberResDTO.MyCourseDTO.builder()
                 .courseId(flat.courseId())
+                .originalCourseId(flat.originalCourseId())
                 .memberCourseId(flat.memberCourseId())
                 .courseTitle(flat.courseTitle())
                 .regionName(flat.regionName())

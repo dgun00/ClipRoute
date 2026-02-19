@@ -35,6 +35,7 @@ public class MemberResDTO {
     @Builder
     public record MyCourseDTO(
             Long courseId,
+            Long originalCourseId,
             Long memberCourseId,
             String courseTitle,
             String regionName,
