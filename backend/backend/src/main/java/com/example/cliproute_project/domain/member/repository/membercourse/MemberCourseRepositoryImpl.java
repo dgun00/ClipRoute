@@ -200,6 +200,7 @@ public class MemberCourseRepositoryImpl implements MemberCourseRepositoryCustom 
                 .select(Projections.constructor(
                         MyCourseListFlat.class,
                         c.id,
+                        c.originalCourse.id,
                         mc.id,
                         c.title,
                         r.regionName,
@@ -230,6 +231,7 @@ public class MemberCourseRepositoryImpl implements MemberCourseRepositoryCustom 
                 )
                 .groupBy(
                         c.id,
+                        c.originalCourse.id,
                         c.title,
                         r.regionName,
                         v.ytVideoId,

@@ -143,6 +143,7 @@ public class CourseQueryServiceImpl implements CourseQueryService {
                 course.getRegion().getId(),
                 course.getRegion().getRegionName(),
                 scrapState.isScrapped(),
+                scrapState.myCourseId(),
                 scrapState.travelStatus(),
                 itineraries
         );
@@ -163,14 +164,14 @@ public class CourseQueryServiceImpl implements CourseQueryService {
 
     private ScrapState toScrapState(MemberCourse mc) {
         // 비즈니스 룰에 따라:
-        return new ScrapState(mc.getIsScrapped(), mc.getTravelStatus());
+        return new ScrapState(mc.getIsScrapped(), mc.getCourse().getId(), mc.getTravelStatus());
     }
 
     // 유튜브 url 생성 메서드
     // 스크랩/여행상태 record 정의, 비로그인 시 디폴트값 주는 메서드
-    private record ScrapState(boolean isScrapped, TravelStatus travelStatus) {
+    private record ScrapState(boolean isScrapped, Long myCourseId, TravelStatus travelStatus) {
         static ScrapState defaultState() {
-            return new ScrapState(false, TravelStatus.NONE);
+            return new ScrapState(false, null, TravelStatus.NONE);
         }
     }
 

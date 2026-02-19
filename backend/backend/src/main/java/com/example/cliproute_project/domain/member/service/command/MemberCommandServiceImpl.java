@@ -63,6 +63,13 @@ public class MemberCommandServiceImpl implements MemberCommandService {
             Course course = memberCourse.getCourse();
             if (course != null && Boolean.TRUE.equals(course.getIsCustomized())) {
                 course.markDeleted(deletedAt);
+
+                List<CoursePlace> coursePlaces = coursePlaceRepository.findAllByCourseId(course.getId());
+                for (CoursePlace coursePlace : coursePlaces) {
+                    if (coursePlace.getDeletedAt() == null) {
+                        coursePlace.markDeleted(deletedAt);
+                    }
+                }
             }
         }
 

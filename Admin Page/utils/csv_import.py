@@ -126,15 +126,22 @@ def _extract_youtube_id(value: Optional[str]) -> Optional[str]:
 
 
 def _parse_travel_days(value: Optional[str]) -> Optional[int]:
-    if not value or not isinstance(value, str):
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        try:
+            return int(value)
+        except Exception:
+            return None
+    if not isinstance(value, str):
         return None
     v = value.strip()
     if "당일" in v:
         return 1
-    nums = re.findall(r"\d+", v)
-    if nums:
+    match = re.search(r"\d+(?:\.\d+)?", v)
+    if match:
         try:
-            return int(nums[-1])
+            return int(float(match.group(0)))
         except Exception:
             return None
     return None
@@ -226,6 +233,11 @@ def import_preprocessed_csv(
     df["course_title"] = df["course_title"].ffill()
     df["yt_video_id"] = df["yt_video_id"].ffill()
     df["travel_day"] = df["travel_day"].ffill()
+
+    df["travel_day_num"] = pd.to_numeric(df.get("travel_day"), errors="coerce")
+    df["visit_day_num"] = pd.to_numeric(df.get("visit_day"), errors="coerce")
+    travel_days_by_course = df.groupby("course_title")["travel_day_num"].max()
+    visit_days_by_course = df.groupby("course_title")["visit_day_num"].max()
 
     # videos
     video_rows = []
@@ -374,15 +386,26 @@ def import_preprocessed_csv(
             source_video_to_course_id[source_video_id] = existing_id
             continue
 
-        travel_days = _parse_travel_days(str(row.get("travel_day") or ""))
-        if not travel_days:
-            travel_days = 1
         title = str(row.get("course_title") or "").strip()
         if not title:
             title = str(row.get("video_title") or "").strip()
         if not title:
             title = f"course-{source_video_id}"
 
+        travel_days = None
+        td = travel_days_by_course.get(title)
+        if pd.notna(td):
+            travel_days = int(td)
+        else:
+            td = _parse_travel_days(str(row.get("travel_day") or ""))
+            if td:
+                travel_days = td
+        if not travel_days:
+            vd = visit_days_by_course.get(title)
+            if pd.notna(vd):
+                travel_days = int(vd)
+        if not travel_days:
+            travel_days = 1
         course_rows.append(
             {
                 "source_video_id": source_video_id,

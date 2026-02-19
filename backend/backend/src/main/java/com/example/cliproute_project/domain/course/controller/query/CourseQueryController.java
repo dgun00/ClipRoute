@@ -1,12 +1,14 @@
 package com.example.cliproute_project.domain.course.controller.query;
 
+import com.example.cliproute_project.domain.auth.util.JwtUtil;
 import com.example.cliproute_project.domain.course.dto.res.CourseResDTO;
 import com.example.cliproute_project.domain.course.exception.code.CourseSuccessCode;
 import com.example.cliproute_project.domain.course.service.query.CourseQueryService;
+import com.example.cliproute_project.domain.member.exception.MemberException;
+import com.example.cliproute_project.domain.member.exception.code.MemberErrorCode;
+import com.example.cliproute_project.domain.member.repository.member.MemberRepository;
 import com.example.cliproute_project.global.apiPayload.ApiResponse;
-import com.example.cliproute_project.global.apiPayload.code.GeneralSuccessCode;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 public class CourseQueryController implements CourseQueryControllerDocs {
 
     private final CourseQueryService courseQueryService;
+    private final JwtUtil jwtUtil;
+    private final MemberRepository memberRepository;
 
     // [2 API]
     @GetMapping("")
@@ -65,12 +69,26 @@ public class CourseQueryController implements CourseQueryControllerDocs {
     @GetMapping("/{courseId}")
     public ApiResponse<CourseResDTO.CourseDetailDTO> getCourseDetail(
             @PathVariable Long courseId,
-            @RequestHeader(value = "X-MEMBER-ID", required = false) Long memberId
+            @RequestHeader(value = "Authorization", required = false) String token
     ) {
+        Long memberId = extractMemberId(token);
         CourseResDTO.CourseDetailDTO response = courseQueryService.getCourseDetail(courseId, memberId);
         return ApiResponse.onSuccess(
                 CourseSuccessCode.COURSE_DETAIL_FETCH_SUCCESS,
                 response);
     }
 
+    private Long extractMemberId(String token) {
+        if (token == null || token.isBlank()) {
+            return null;
+        }
+        if (!token.startsWith("Bearer ")) {
+            throw new MemberException(MemberErrorCode.UNAUTHORIZED);
+        }
+
+        String email = jwtUtil.getUserInfoFromToken(token.substring(7));
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.MEMBER_NOT_FOUND))
+                .getId();
+    }
 }

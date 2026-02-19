@@ -59,35 +59,48 @@ if mode == "전처리 CSV(코스/장소 일괄)":
         format_func=lambda x: f"{x} | {member_options[[m['id'] for m in member_options].index(x)]['label']}",
     )
 
-    uploaded = st.file_uploader("CSV 파일 업로드", type=["csv"])
+    uploaded = st.file_uploader("CSV 파일 업로드", type=["csv"], accept_multiple_files=True)
     if uploaded:
-        df = _read_csv_with_fallback(uploaded)
-        df = normalize_preprocessed_df(df)
-        df = df.dropna(how="all")
+        uploaded_files = uploaded if isinstance(uploaded, list) else [uploaded]
+        parsed_files = []
 
-        # region_id must exist in CSV
-        if "region_id" not in df.columns:
-            st.error("region_id 컬럼을 CSV에 포함해주세요.")
-            st.stop()
+        for uploaded_file in uploaded_files:
+            df = _read_csv_with_fallback(uploaded_file)
+            df = normalize_preprocessed_df(df)
+            df = df.dropna(how="all")
 
-        # latitude/longitude columns: accept either "??/??" or "lat/lng"
-        if "위도" in df.columns and "경도" in df.columns:
-            lat_col = "위도"
-            lng_col = "경도"
-        elif "lat" in df.columns and "lng" in df.columns:
-            lat_col = "lat"
-            lng_col = "lng"
-        else:
-            st.error("CSV에 위도/경도(또는 lat/lng) 컬럼을 포함해주세요.")
-            st.stop()
+            # latitude/longitude columns: accept either "위도/경도" or "lat/lng"
+            # region_id must exist in CSV
+            if "region_id" not in df.columns:
+                st.error(f"region_id 컬럼을 CSV에 포함해주세요. (file: {uploaded_file.name})")
+                st.stop()
 
-        region_id = df["region_id"].dropna().astype(int).iloc[0] if not df["region_id"].dropna().empty else None
-        if region_id is None:
-            st.error("region_id 값이 비어 있습니다.")
-            st.stop()
+            if "위도" in df.columns and "경도" in df.columns:
+                lat_col = "위도"
+                lng_col = "경도"
+            elif "lat" in df.columns and "lng" in df.columns:
+                lat_col = "lat"
+                lng_col = "lng"
+            else:
+                st.error(f"CSV에 위도/경도(또는 lat/lng) 컬럼을 포함해주세요. (file: {uploaded_file.name})")
+                st.stop()
+
+            region_id = df["region_id"].dropna().astype(int).iloc[0] if not df["region_id"].dropna().empty else None
+            if region_id is None:
+                st.error(f"region_id 값이 비어 있습니다. (file: {uploaded_file.name})")
+                st.stop()
+
+            parsed_files.append({
+                "name": uploaded_file.name,
+                "df": df,
+                "region_id": region_id,
+                "lat_col": lat_col,
+                "lng_col": lng_col,
+            })
 
         st.subheader("미리보기")
-        st.dataframe(df.head(20), use_container_width=True)
+        preview_idx = st.selectbox("Preview file", options=list(range(len(parsed_files))), format_func=lambda i: parsed_files[i]["name"]) 
+        st.dataframe(parsed_files[preview_idx]["df"].head(20), use_container_width=True)
 
         is_running = st.session_state.get("csv_upload_running", False)
 
@@ -102,33 +115,57 @@ if mode == "전처리 CSV(코스/장소 일괄)":
                 st.session_state["csv_upload_show_dialog"] = False
                 st.session_state["csv_upload_running"] = True
                 st.session_state["csv_upload_payload"] = {
-                    "df": df,
-                    "region_id": region_id,
+                    "files": parsed_files,
                     "author_id": author_id,
-                    "lat_col": lat_col,
-                    "lng_col": lng_col,
                 }
                 st.rerun()
 
         if is_running and st.session_state.get("csv_upload_payload"):
             payload = st.session_state.get("csv_upload_payload", {})
             try:
-                result = import_preprocessed_csv(
-                    df=payload["df"],
-                    region_id=payload["region_id"],
-                    author_id=payload["author_id"],
-                    source_video_mode="yt",
-                    default_source_video_id=None,
-                    lat_col=payload["lat_col"],
-                    lng_col=payload["lng_col"],
-                    default_lat=None,
-                    default_lng=None,
-                )
-                message = (
-                    f"완료: videos {result['videos']}건 images {result['images']}건 courses {result['courses']}건 "
-                    f"places {result['places']}건 course_place {result['course_place']}건 "
-                    f"이미지업로드 {result.get('image_uploads', 0)}건"
-                )
+                file_results = []
+                total = {
+                    "videos": 0,
+                    "images": 0,
+                    "courses": 0,
+                    "places": 0,
+                    "course_place": 0,
+                    "image_uploads": 0,
+                }
+                for item in payload.get("files", []):
+                    result = import_preprocessed_csv(
+                        df=item["df"],
+                        region_id=item["region_id"],
+                        author_id=payload["author_id"],
+                        source_video_mode="yt",
+                        default_source_video_id=None,
+                        lat_col=item["lat_col"],
+                        lng_col=item["lng_col"],
+                        default_lat=None,
+                        default_lng=None,
+                    )
+                    file_results.append((item["name"], result))
+                    for key in total:
+                        total[key] += result.get(key, 0)
+
+                lines = []
+                for name, result in file_results:
+                    lines.append(f"? {name}")
+                    lines.append(f"  - videos: {result['videos']}")
+                    lines.append(f"  - images: {result['images']}")
+                    lines.append(f"  - courses: {result['courses']}")
+                    lines.append(f"  - places: {result['places']}")
+                    lines.append(f"  - course_place: {result['course_place']}")
+                    lines.append(f"  - image_uploads: {result.get('image_uploads', 0)}")
+                    lines.append("")
+                lines.append("TOTAL")
+                lines.append(f"  - videos: {total['videos']}")
+                lines.append(f"  - images: {total['images']}")
+                lines.append(f"  - courses: {total['courses']}")
+                lines.append(f"  - places: {total['places']}")
+                lines.append(f"  - course_place: {total['course_place']}")
+                lines.append(f"  - image_uploads: {total['image_uploads']}")
+                message = "\n".join(lines)
                 st.success(message)
                 st.session_state["csv_upload_done"] = True
                 st.session_state["csv_upload_message"] = message

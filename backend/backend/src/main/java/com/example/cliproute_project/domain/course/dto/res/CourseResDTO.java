@@ -45,6 +45,7 @@ public class CourseResDTO {
             Long regionId,
             String regionName,
             Boolean isScrapped,
+            Long myCourseId,
             TravelStatus travelStatus, // BEFORE, AFTER, NONE
             List<ItineraryDTO> itineraries
     ) {}

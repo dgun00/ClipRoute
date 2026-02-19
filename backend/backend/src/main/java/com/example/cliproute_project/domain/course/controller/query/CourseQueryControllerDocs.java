@@ -35,7 +35,7 @@ public interface CourseQueryControllerDocs {
 
     @Operation(
             summary = "[4 API] Course detail",
-            description = "Returns course detail. Member id is optional."
+            description = "Returns course detail. Authorization token is optional."
     )
     @ApiResponses({
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Swagger response"),
@@ -44,6 +44,6 @@ public interface CourseQueryControllerDocs {
     })
     ApiResponse<CourseResDTO.CourseDetailDTO> getCourseDetail(
             @Positive Long courseId,
-            Long memberId
+            String token
     );
 }
