@@ -1,37 +1,55 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import usericon from "../assets/icons/user-icon.svg";
 import passwordicon from "../assets/icons/password-icon.svg";
 import useForm from "../hooks/useForm";
 import { validateSignin, type LoginInformation } from "../utils/validate";
-
+import { login } from "../api/auth";
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [keepLogin, setKeepLogin] = useState(false);
-  
-  const navigate = useNavigate(); 
+  const [isLoading, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   const { values, errors, touched, getInputProps } = useForm<LoginInformation>({
-    initialValue: { 
-      email: "", 
-      password: "" 
+    initialValue: {
+      email: "",
+      password: ""
     },
-    validate: validateSignin, 
+    validate: validateSignin,
   });
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     const noErrors = !errors.email && !errors.password;
     const isSubmitted = values.email && values.password;
 
-    if (noErrors && isSubmitted) {
-      console.log("로그인 시도:", { 
-        email: values.email, 
-        password: values.password,
-        keepLogin 
-      });
-      alert("로그인 성공");
-    } else {
+    if (!noErrors || !isSubmitted) {
       alert("입력 정보를 다시 확인해주세요.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // auth.ts의 login 함수가 토큰 저장까지 처리
+      await login(
+        {
+          email: values.email,
+          password: values.password,
+        },
+        { keepLogin }  // 로그인 상태 유지 옵션 전달
+      );
+
+      alert("로그인 성공!");
+      navigate("/");
+
+    } catch (error: any) {
+      console.error("로그인 에러:", error);
+      const errorMessage = error.response?.data?.message || error.message || "로그인에 실패했습니다.";
+      alert(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -43,7 +61,7 @@ export default function LoginPage() {
         </h1>
       </div>
 
-      
+
       <div className="space-y-4 mb-10">
         {/* 이메일 입력 */}
         <div>
@@ -54,7 +72,7 @@ export default function LoginPage() {
             <input
               type="email"
               placeholder="이메일"
-              {...getInputProps("email")} 
+              {...getInputProps("email")}
               className="w-full h-[55px] pl-[45px] pr-[15px] bg-[#F4F4F4] border-none focus:ring-2 focus:ring-[#42BCEB] outline-none transition-all placeholder:text-[#606060]"
             />
           </div>
@@ -72,7 +90,7 @@ export default function LoginPage() {
             <input
               type={showPassword ? "text" : "password"}
               placeholder="비밀번호"
-              {...getInputProps("password")} 
+              {...getInputProps("password")}
               className="w-full h-[55px] pl-[45px] pr-[45px] bg-[#F4F4F4] border-none focus:ring-2 focus:ring-[#42BCEB] outline-none transition-all placeholder:text-[#606060]"
             />
             <button
@@ -107,14 +125,15 @@ export default function LoginPage() {
       <div className="space-y-6">
         <button
           onClick={handleLogin}
-          className="w-full h-14 bg-[#42BCEB] text-white text-lg font-bold rounded-xl hover:bg-[#3ba8d4] active:scale-[0.98] transition-all shadow-md shadow-blue-50"
+          disabled={isLoading}
+          className="w-full h-14 bg-[#42BCEB] text-white text-lg font-bold rounded-xl hover:bg-[#3ba8d4] active:scale-[0.98] transition-all shadow-md shadow-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          로그인
+          {isLoading ? "로그인 중..." : "로그인"}
         </button>
 
         <div className="flex justify-center items-center gap-4 text-[13px] text-gray-500 font-medium">
-          <button 
-            onClick={() => navigate("/signup")} 
+          <button
+            onClick={() => navigate("/signup")}
             className="hover:text-gray-800 transition-colors"
           >
             회원가입

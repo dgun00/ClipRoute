@@ -31,7 +31,7 @@ const DateSelectModal = ({ isOpen, onClose, onConfirm }: DateSelectModalProps) =
 
   const formatDateRange = () => {
     if (!startDate) return '날짜를 선택해주세요';
-    
+
     const format = (date: Date) => {
       const year = date.getFullYear();
       const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -40,7 +40,7 @@ const DateSelectModal = ({ isOpen, onClose, onConfirm }: DateSelectModalProps) =
     };
 
     if (!endDate) return format(startDate);
-    
+
     const days = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
     const nights = days - 1;
     return `${format(startDate)} - ${format(endDate)} [${nights}박 ${days}일]`;
@@ -57,20 +57,20 @@ const DateSelectModal = ({ isOpen, onClose, onConfirm }: DateSelectModalProps) =
           animation: modalUp 0.35s cubic-bezier(0.33, 1, 0.68, 1) forwards;
         }
       `}</style>
-      
-      
-      <div 
+
+
+      <div
         className="fixed inset-0 z-50 flex items-center justify-center bg-white"
       >
         <div className="w-full h-full max-w-md bg-white flex flex-col date-select-modal animate-modal-up">
           <Header
             center={<span className='text-[18px] font-bold text-black'>날짜 선택</span>}
             right={
-              <button 
+              <button
                 onClick={onClose}
                 className="p-2 flex items-center justify-center text-gray-600 active:opacity-50"
               >
-                <img src={closeicon} alt="닫기" className='w-4 h-4'/>
+                <img src={closeicon} alt="닫기" className='w-4 h-4' />
               </button>
             }
           />
@@ -78,12 +78,12 @@ const DateSelectModal = ({ isOpen, onClose, onConfirm }: DateSelectModalProps) =
           {/* 선택된 날짜 표시 */}
           <div className="px-5 pt-6 pb-3 shrink-0">
             <div className="flex items-center gap-2 px-4 py-4 bg-white rounded-2xl border-1 border-[#42BCEB] font-semibold">
-              <img src={calendaricon} className='w-6 h-6'/>
+              <img src={calendaricon} className='w-6 h-6' />
               <span className="text-[15px] text-gray-800">{formatDateRange()}</span>
             </div>
           </div>
 
-          
+
           <div className="px-5 flex-1 overflow-y-auto flex items-start justify-center pt-4">
             <DatePicker
               selected={startDate}
@@ -103,7 +103,7 @@ const DateSelectModal = ({ isOpen, onClose, onConfirm }: DateSelectModalProps) =
             />
           </div>
 
-         
+
           <div className="px-5 pb-10 shrink-0">
             <button
               onClick={handleConfirm}

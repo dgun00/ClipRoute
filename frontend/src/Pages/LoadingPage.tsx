@@ -1,17 +1,14 @@
 import { useEffect, useState } from 'react';
 
 const CustomSpinner = () => (
-  <div 
-    className="relative w-14 h-14 animate-spin"
-    style={{ animationDuration: '1.2s' }} 
-  >
+  <div className="relative w-10 h-10 animate-spin" style={{ animationDuration: '1s' }}>
     {[...Array(8)].map((_, i) => (
       <div
         key={i}
-        className="absolute left-1/2 top-0 w-[4px] h-[14px] bg-[#42BCEB] rounded-full origin-[2px_28px]"
+        className="absolute left-1/2 top-0 w-[3px] h-[9px] bg-[#42BCEB] rounded-full -ml-[1.5px] origin-[50%_20px]"
         style={{
-          transform: `translateX(-50%) rotate(${i * 45}deg)`,
-          opacity: i === 0 ? 1 : 1 - i * 0.12, 
+          transform: `rotate(${i * 45}deg)`,
+          opacity: i === 0 ? 1 : 0.2 + (0.8 * (1 - i / 8)), // 부드러운 투명도 처리
         }}
       />
     ))}
@@ -34,14 +31,14 @@ const LoadingPage = () => {
         <div className="mb-8">
           <CustomSpinner />
         </div>
-        
+
         <h1 className="text-[20px] font-bold text-[#333] mb-2 text-center">
           코스 생성 중...
         </h1>
         <p className="text-[14px] text-gray-400">곧 코스 결과를 보여드릴게요</p>
 
         <div className="w-full max-w-[280px] h-[6px] bg-[#E5E5E5] rounded-full mt-10 overflow-hidden">
-          <div 
+          <div
             className="h-full bg-[#42BCEB] transition-all duration-300 ease-out"
             style={{ width: `${progress}%` }}
           />

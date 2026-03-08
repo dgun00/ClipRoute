@@ -1,11 +1,15 @@
 import { useState } from 'react';
+import NavigationLayout from '../layouts/NavigationLayout';
 import Header from '../components/common/Header';
 import { CourseInputCard } from '../components/CourseInputCard';
 import DestinationModal from '../components/modals/DestinationModal';
 import DateSelectModal from '../components/modals/DateSelectModal';
-import VideoCard from '../components/VideoCard';
+import VideoSection from '../components/VideoSection';
 import bellicon from "../assets/icons/bell-icon.svg";
 import logoicon from "../assets/icons/logo-icon.svg";
+import backicon from "../assets/icons/back-icon.svg";
+import { useNavigate } from "react-router-dom";
+
 
 interface Destination {
   regionId: number;
@@ -18,118 +22,146 @@ interface DateRange {
   endDate: Date | null;
 }
 
-const mockVideos = [
-  {
-    id: 1,
-    title: '[제날멍]\n영상 제목이 들어갑니다.',
-    region: '여행지',
-    duration: '1박 2일'
-  },
-  {
-    id: 2,
-    title: '[제날멍]\n영상 제목이 들어갑니다.',
-    region: '여행지',
-    duration: '2박 3일'
-  },
-  {
-    id: 3,
-    title: '[제날멍]\n영상 제목이 들어갑니다.',
-    region: '여행지',
-    duration: '2박 3일'
-  },
-  {
-    id: 4,
-    title: '[제날멍]\n영상 제목이 들어갑니다.',
-    region: '여행지',
-    duration: '2박 3일'
-  }
-];
-
 const HomePage = () => {
   const [isDestinationModalOpen, setIsDestinationModalOpen] = useState(false);
   const [isDateModalOpen, setIsDateModalOpen] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState<Destination | null>(null);
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange | null>(null);
+  const [shouldFilter, setShouldFilter] = useState(false);
 
-  // 여행 일수 계산 함수
   const calculateTravelDays = (dateRange: DateRange | null): number | null => {
     if (!dateRange?.startDate || !dateRange?.endDate) return null;
     const days = Math.ceil(
       (dateRange.endDate.getTime() - dateRange.startDate.getTime()) / (1000 * 60 * 60 * 24)
-    ) + 1;
+    );
     return days;
   };
 
+  const navigate = useNavigate();
+
+
+  const handleGenerateCourse = () => {
+    if (!selectedDestination) return;
+
+    const params = new URLSearchParams();
+    params.append("regionId", String(selectedDestination.regionId));
+
+    if (travelDays !== null) {
+      params.append("travelDays", String(travelDays));
+    }
+
+    if (selectedDateRange?.startDate && selectedDateRange?.endDate) {
+      // 날짜 포맷 (YYYY-MM-DD)
+      const formatDate = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      params.append("startDate", formatDate(selectedDateRange.startDate));
+      params.append("endDate", formatDate(selectedDateRange.endDate));
+    }
+
+    console.log("이동 경로:", `/courses?${params.toString()}`);
+    navigate(`/courses?${params.toString()}`);
+  };
+
+  const handleBackToMain = () => {
+    setShouldFilter(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const isFilterMode = shouldFilter && (selectedDestination !== null || selectedDateRange !== null);
+  const isAnyModalOpen = isDestinationModalOpen || isDateModalOpen;
+  const travelDays = calculateTravelDays(selectedDateRange);
+
+
+  const getFilterTitle = () => {
+    const parts: string[] = [];
+    if (selectedDestination) parts.push(selectedDestination.regionName);
+    if (travelDays) parts.push(`${travelDays}박 ${travelDays + 1}일`);
+    return parts.join(' ') + ' 여행 코스';
+  };
+
   return (
-    <div className="bg-white min-h-screen">
-      <Header
-        left={<img src={logoicon} alt="logo"/>}
-        right={<img src={bellicon} alt="notifications" className='w-5 h-5'/>}
-      />
+    <NavigationLayout activeTab="home" hideNavigation={isAnyModalOpen}>
+      <div className="bg-white min-h-screen">
+        {/* 조건부 헤더 렌더링 */}
+        {isFilterMode ? (
+          <Header
+            left={
+              <div className="flex items-center gap-3">
+                <button onClick={handleBackToMain}>
+                  <img src={backicon} alt="back" className="w-4 h-4" />
+                </button>
+                <h1 className="font-bold text-base">{getFilterTitle()}</h1>
+              </div>}
 
-      <main className='px-5 pt-6'>
-        <h1 className="font-sans font-[700] text-[1rem] pb-[15px]">
-  대표 여행 유튜버들의 국내 여행 코스를 한 눈에!
-</h1>
+          />
+        ) : (
+          <Header
+            left={<img src={logoicon} alt="logo" />}
+            right={<img src={bellicon} alt="notifications" className='w-5 h-5' />}
+          />
+        )}
 
-        <CourseInputCard 
-          region={selectedDestination} 
-          dateRange={selectedDateRange}
-          onLocationClick={() => setIsDestinationModalOpen(true)}
-          onDateClick={() => setIsDateModalOpen(true)}
-        />
+        <main className='px-5 pt-6 pb-24'>
 
-        <div className="flex justify-end mt-4">
-          <button 
-            className="px-5 py-3 rounded-xl font-bold bg-[#42BCEB] text-white active:opacity-80 transition-all"
-            onClick={() => {
-              console.log("선택된 여행지:", selectedDestination);
-              console.log("선택된 날짜:", selectedDateRange);
-              console.log("여행 일수:", calculateTravelDays(selectedDateRange));
-            }}>
-            코스 생성하기
-          </button>
-        </div>
+          {!isFilterMode && (
+            <h1 className="font-sans font-[700] text-[1rem] pb-[15px]">
+              대표 여행 유튜버들의 국내 여행 코스를 한 눈에!
+            </h1>
+          )}
 
-        <DestinationModal 
-          isOpen={isDestinationModalOpen}
-          onClose={() => setIsDestinationModalOpen(false)}
-          onSelect={(dest) => {
-            setSelectedDestination(dest);
-            setIsDestinationModalOpen(false);
-          }} 
-        />
 
-        <DateSelectModal
-          isOpen={isDateModalOpen}
-          onClose={() => setIsDateModalOpen(false)}
-          onConfirm={(dateRange) => {
-            setSelectedDateRange(dateRange);
-          }}
-        />
+          <CourseInputCard
+            region={selectedDestination}
+            dateRange={selectedDateRange}
+            onLocationClick={() => setIsDestinationModalOpen(true)}
+            onDateClick={() => setIsDateModalOpen(true)}
+          />
 
-        
-        <div className="mt-12 pt-8 border-t border-gray-100">
-          <h2 className="font-bold text-[18px]">대표 지역 / 인기 영상 속 코스</h2>
-          <p className="text-[14px] text-gray-400 mt-1 mb-5">
-            현재 가장 인기 있는 대표 지역은 제주, 부산입니다.
-          </p>
 
-         
-          <div className="grid grid-cols-1 gap-4 pb-8">
-            {mockVideos.map((video) => (
-              <VideoCard
-                key={video.id}
-                title={video.title}
-                region={video.region}
-                duration={video.duration}
-                onClick={() => console.log('영상 클릭:', video.id)}
-              />
-            ))}
+          {!isFilterMode && (
+            <div className="flex justify-end mt-4">
+              <button
+                className="px-5 py-3 rounded-xl font-bold bg-[#42BCEB] text-white active:opacity-80 transition-all"
+                onClick={handleGenerateCourse}
+              >
+                코스 생성하기
+              </button>
+            </div>
+          )}
+
+          <DestinationModal
+            isOpen={isDestinationModalOpen}
+            onClose={() => setIsDestinationModalOpen(false)}
+            onSelect={(dest) => {
+              setSelectedDestination(dest);
+              setIsDestinationModalOpen(false);
+            }}
+          />
+
+          <DateSelectModal
+            isOpen={isDateModalOpen}
+            onClose={() => setIsDateModalOpen(false)}
+            onConfirm={(dateRange) => {
+              setSelectedDateRange(dateRange);
+            }}
+          />
+
+          {/* VideoSection */}
+          <div id="video-section" className={isFilterMode ? 'mt-6' : ''}>
+            <VideoSection
+              destination={selectedDestination}
+              travelDays={travelDays}
+              shouldFilter={shouldFilter}
+            />
           </div>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </NavigationLayout>
   );
 };
 

@@ -64,14 +64,16 @@
   background-color: transparent;
 }
 
-/* 일요일 빨간색 */
+/* 일요일: 헤더 이름 + 날짜 숫자 (빨강) */
+.date-select-modal .react-datepicker__day-name:first-child,
 .date-select-modal .react-datepicker__day--sunday {
-  color: #ef4444;
+  color: #FF8989 !important;
 }
 
-/* 토요일 파란색 */
+/* 토요일: 헤더 이름 + 날짜 숫자 (파랑) */
+.date-select-modal .react-datepicker__day-name:last-child,
 .date-select-modal .react-datepicker__day--saturday {
-  color: #3b82f6;
+  color: #89B2FF !important;
 }
 
 /* 네비게이션 버튼 */
