@@ -20,9 +20,9 @@ jobs:
           java-version: '17'
 
       - name: Build Jar
+        working-directory: backend/backend
         run: |
-          chmod +x ./backend/gradlew
-          cd backend
+          chmod +x ./gradlew
           ./gradlew clean bootJar
 
       - name: Docker Login
@@ -32,7 +32,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build Image
-        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/cliproute-backend ./backend
+        run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/cliproute-backend ./backend/backend
 
       - name: Push Image
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/cliproute-backend
