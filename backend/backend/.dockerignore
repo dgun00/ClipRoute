@@ -1,0 +1,7 @@
+.git
+.github
+.gradle
+build/tmp
+build/reports
+node_modules
+*.log
