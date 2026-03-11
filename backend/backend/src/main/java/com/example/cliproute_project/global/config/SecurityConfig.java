@@ -33,7 +33,8 @@ public class SecurityConfig {
                     corsConfiguration.setAllowedOriginPatterns(java.util.List.of(
                             "http://localhost:517*",
                             "http://localhost:3000",
-                            "https://cliproute.vercel.app"
+                            "https://cliproute.vercel.app",
+                            "https://frontend-five-theta-26.vercel.app"
                     ));
                     corsConfiguration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
                     corsConfiguration.setAllowedHeaders(java.util.List.of("*"));
