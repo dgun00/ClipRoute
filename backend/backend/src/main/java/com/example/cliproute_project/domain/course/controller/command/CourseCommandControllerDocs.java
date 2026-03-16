@@ -4,7 +4,6 @@ import com.example.cliproute_project.domain.course.dto.req.CourseReqDTO;
 import com.example.cliproute_project.domain.course.dto.res.CourseResDTO;
 import com.example.cliproute_project.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -25,69 +24,17 @@ public interface CourseCommandControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "400",
                     description = "Bad request (business codes: MEMBER400_1, COURSE400_1)",
-                    content = @Content(
-                            schema = @Schema(implementation = ApiResponse.class),
-                            examples = {
-                                    @ExampleObject(
-                                            name = "Invalid Member Id",
-                                            value = """
-                                                    {
-                                                      "isSuccess": false,
-                                                      "code": "MEMBER400_1",
-                                                      "message": "Invalid member id.",
-                                                      "result": null
-                                                    }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "Invalid Course Id",
-                                            value = """
-                                                    {
-                                                      "isSuccess": false,
-                                                      "code": "COURSE400_1",
-                                                      "message": "Invalid course id.",
-                                                      "result": null
-                                                    }
-                                                    """
-                                    )
-                            }
-                    )
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
             ),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "401",
                     description = "Unauthorized (business code: MEMBER401_1)",
-                    content = @Content(
-                            schema = @Schema(implementation = ApiResponse.class),
-                            examples = @ExampleObject(
-                                    name = "Unauthorized",
-                                    value = """
-                                            {
-                                              "isSuccess": false,
-                                              "code": "MEMBER401_1",
-                                              "message": "Authentication required.",
-                                              "result": null
-                                            }
-                                            """
-                            )
-                    )
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
             ),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "404",
                     description = "Not found (business code: COURSE404_1)",
-                    content = @Content(
-                            schema = @Schema(implementation = ApiResponse.class),
-                            examples = @ExampleObject(
-                                    name = "Course Not Found",
-                                    value = """
-                                            {
-                                              "isSuccess": false,
-                                              "code": "COURSE404_1",
-                                              "message": "Course not found.",
-                                              "result": null
-                                            }
-                                            """
-                            )
-                    )
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
     ApiResponse<CourseResDTO.ScrapResultDTO> scrapCourse(

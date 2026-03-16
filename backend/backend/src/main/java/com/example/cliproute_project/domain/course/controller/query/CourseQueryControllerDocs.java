@@ -4,7 +4,6 @@ package com.example.cliproute_project.domain.course.controller.query;
 import com.example.cliproute_project.domain.course.dto.res.CourseResDTO;
 import com.example.cliproute_project.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -55,51 +54,12 @@ public interface CourseQueryControllerDocs {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "401",
                     description = "Unauthorized (business code: MEMBER401_1)",
-                    content = @Content(
-                            schema = @Schema(implementation = ApiResponse.class),
-                            examples = @ExampleObject(
-                                    name = "Unauthorized",
-                                    value = """
-                                            {
-                                              "isSuccess": false,
-                                              "code": "MEMBER401_1",
-                                              "message": "Authentication required.",
-                                              "result": null
-                                            }
-                                            """
-                            )
-                    )
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
             ),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "404",
                     description = "Not found (business codes: COURSE404_1, MEMBER404_1)",
-                    content = @Content(
-                            schema = @Schema(implementation = ApiResponse.class),
-                            examples = {
-                                    @ExampleObject(
-                                            name = "Course Not Found",
-                                            value = """
-                                                    {
-                                                      "isSuccess": false,
-                                                      "code": "COURSE404_1",
-                                                      "message": "Course not found.",
-                                                      "result": null
-                                                    }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "Member Not Found",
-                                            value = """
-                                                    {
-                                                      "isSuccess": false,
-                                                      "code": "MEMBER404_1",
-                                                      "message": "Member not found.",
-                                                      "result": null
-                                                    }
-                                                    """
-                                    )
-                            }
-                    )
+                    content = @Content(schema = @Schema(implementation = ApiResponse.class))
             )
     })
     ApiResponse<CourseResDTO.CourseDetailDTO> getCourseDetail(
