@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Validated
 //@CrossOrigin(origins = "*")
-@Tag(name = "Course", description = "코스 관련 API")
+@Tag(name = "Course", description = "Course APIs")
 public class CourseQueryController implements CourseQueryControllerDocs {
 
     private final CourseQueryService courseQueryService;

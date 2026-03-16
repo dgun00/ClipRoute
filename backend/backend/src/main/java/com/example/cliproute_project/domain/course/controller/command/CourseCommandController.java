@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/courses")
-@Tag(name = "Course", description = "코스 관련 API")
+@Tag(name = "Course", description = "Course APIs")
 public class CourseCommandController implements CourseCommandControllerDocs {
 
     private final CourseCommandService courseCommandService;
