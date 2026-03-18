@@ -5,7 +5,7 @@
 
 포트폴리오 관점에서는 "비정형 콘텐츠를 구조화된 여행 데이터로 전환하고, 추천과 편집 경험까지 연결한 서비스"라는 점이 가장 큰 특징입니다.
 
-[CLIPROUTE 링크](frontend-five-theta-26.vercel.app)
+[CLIPROUTE 링크](https://frontend-five-theta-26.vercel.app/)
 
 [Swagger 링크](http://3.36.77.141:8080/swagger-ui/index.html#/)
 
