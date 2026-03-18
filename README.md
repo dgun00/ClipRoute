@@ -62,7 +62,7 @@
 - Tailwind CSS
 - TanStack Query
 - React Router
-- Google Maps / Kakao Maps 연동
+- Google Maps 연동
 
 ### Backend
 
