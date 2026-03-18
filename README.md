@@ -9,7 +9,7 @@
 
 - 여행 정보가 유튜브 영상, 자막, 댓글처럼 흩어져 있어 실제 일정으로 옮기기 어렵다는 문제를 해결하려고 했습니다.
 - CLIPROUTE는 영상 속 여행 동선을 코스 데이터로 정리해 추천하고, 사용자가 내 여행 일정으로 저장해 직접 수정할 수 있게 만들었습니다.
-- 일반 사용자용 여행 앱, Spring Boot API 서버, Streamlit 관리자 페이지, AI 기반 데이터 정제 파이프라인으로 구성되어 있습니다.
+- 일반 사용자용 여행 웹앱, Spring Boot API 서버, Streamlit 관리자 페이지, AI 기반 데이터 정제 파이프라인으로 구성되어 있습니다.
 
 ## Key Features
 
@@ -133,48 +133,3 @@ CLIPROUTE/
 - 서비스 화면뿐 아니라 관리자 운영 도구와 데이터 적재 파이프라인까지 함께 설계했다는 점
 - LLM과 외부 장소 검증 API를 결합해 데이터 품질을 높이려 했다는 점
 
-## Local Setup
-
-### 1. Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-기본적으로 Vite 개발 서버에서 실행됩니다.
-
-### 2. Backend
-
-```bash
-cd backend/backend
-export DB_URL=jdbc:mysql://localhost:3306/cliproute
-export DB_USERNAME=YOUR_DB_USERNAME
-export DB_PASSWORD=YOUR_DB_PASSWORD
-export JWT_SECRET=YOUR_JWT_SECRET
-./gradlew bootRun
-```
-
-Spring Boot 기본 포트는 `8080`입니다.
-
-### 3. Admin Page
-
-```bash
-cd admin_page
-pip install -r requirements.txt
-streamlit run app.py
-```
-
-기본적으로 `http://localhost:8501`에서 확인할 수 있습니다.
-
-## Notes
-
-- `backend/backend/src/main/resources/application.yml` 기준으로 DB와 JWT 값은 환경변수로 주입됩니다.
-- 관리자 페이지의 CSV 업로드 기능은 S3 및 DB 설정이 필요합니다.
-- AI 파이프라인은 외부 API와 크롤링/수집 환경 설정이 선행되어야 합니다.
-
-## Portfolio Summary
-
-CLIPROUTE는 단순한 여행 정보 조회 앱이 아니라, 콘텐츠 수집부터 데이터 정제, 추천, 사용자 편집, 관리자 운영까지 하나의 서비스 사이클을 담은 프로젝트입니다.  
-포트폴리오에서는 "사용자 경험을 만드는 프론트엔드", "추천과 데이터 처리를 담당하는 백엔드", "운영을 위한 관리자 도구", "비정형 데이터를 다루는 AI 파이프라인"이 함께 맞물린 프로젝트로 소개하기 좋습니다.
